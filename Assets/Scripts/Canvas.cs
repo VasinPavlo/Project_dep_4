@@ -13,4 +13,11 @@ public class Canvas : MonoBehaviour {
 	void Update () {
 	
 	}
+
+	[System.Serializable]
+	public struct Options
+	{
+		public int n;
+		public int m;
+	}
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using System.Collections.Generic;
 
 public class Camera_Controller : MonoBehaviour {
     public OBJECTS objects;
@@ -25,10 +26,29 @@ public class Camera_Controller : MonoBehaviour {
 	public Vector3 getMousePosition()
 	{
 		//print (getK ());
-		print(objects.mainCamera.ScreenToWorldPoint (new Vector3()));
-		print(objects.mainCamera.WorldToScreenPoint(objects.mainCamera.ScreenToWorldPoint (new Vector3()))
-			+"=="+Input.mousePosition);
+		//print(objects.mainCamera.ScreenToWorldPoint (new Vector3()));
+		//print(objects.mainCamera.WorldToScreenPoint(objects.mainCamera.ScreenToWorldPoint (new Vector3()))
+		//	+"=="+Input.mousePosition);
 		return objects.mainCamera.ScreenToWorldPoint (Input.mousePosition) + getK ();
+	}
+
+	public List<Vector3> getVector_of_point()
+	{
+		List<Vector3> list=new List<Vector3>();
+		float h = objects.rt_canvas.offsetMax.y-objects.rt_canvas.offsetMin.y;
+		float w = objects.rt_canvas.offsetMax.x-objects.rt_canvas.offsetMin.x;
+		float steph = h/(options.m-1);
+		float stepw = w / (options.n - 1);
+		Vector3 vec;
+		for (float x = objects.rt_canvas.offsetMin.x; x <= objects.rt_canvas.offsetMax.x; x+=stepw) {
+			for (float y = objects.rt_canvas.offsetMin.y; y <= objects.rt_canvas.offsetMax.y; y+=steph) {
+				vec = new Vector3 (x, y, 0);
+				vec = objects.canvas.transform.TransformPoint (vec);
+				list.Add (vec);
+			}
+		}
+		print (list.Count);
+		return list;
 	}
 
 	void rotation()
@@ -77,13 +97,17 @@ public class Camera_Controller : MonoBehaviour {
     {
         public Camera mainCamera;
 		public GameObject canvas;
-    }
+		public RectTransform rt_canvas;
+	}
     [System.Serializable]
     public struct OPTIONS
     {
 		public float rotation_speed;
 		public float zoom_speed;
-
+		public int n;
+		public int m;
+		public Vector2 min;
+		public Vector2 max;
     }
 
 }
