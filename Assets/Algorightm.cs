@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
 public class Algorightm : MonoBehaviour {
 
@@ -9,15 +10,36 @@ public class Algorightm : MonoBehaviour {
 	public List<Vector3>  lists_of_speed;
 	List<Edge> _lines;
 	List<Vector3> _points;
-	List<Thread> threads;
+	List<MyThread> threads;
+	Thread thread;
+	[System.NonSerialized]
 	public bool isWork=false;
+	[System.NonSerialized]
+	public bool isTime_Start=false;
 	void Awake () 
 	{
 		//print ("Hello World");
-		threads = new List<Thread> ();
+		threads = new List<MyThread> ();
+		thread = new Thread (update);
+
+		thread.Start();
 	}
 
-	
+	public void plus(int a)
+	{
+		count_of_thread += a;
+	}
+
+
+	public void Des_Time()
+	{
+		for (int i = 0; i < threads.Count; i++) 
+		{
+			threads [i].Des ();
+		}
+		isTime_exit = true;
+	}
+	bool isTime_exit=false;
 	// Update is called once per frame
 	void Update () {
 		options.deltaR2 = options.deltaR * options.deltaR;
@@ -33,15 +55,30 @@ public class Algorightm : MonoBehaviour {
 		return res;
 	}
 
+	void update()
+	{
+		print("thread algorithm:"+thread.ManagedThreadId);
+		while (!isTime_exit) 
+		{
+			if (isTime_Start)
+			{
+				isTime_Start = false;
+				FindList_of_speed ();
+			}
+		}
+	}
+
 	public void FindVector_of_speed(List<Edge> lines,List<Vector3> points)
 	{
 		if (isWork)
 			return;
 		_lines = lines;
 		_points = points;
+
+		isTime_Start=true;
 		isWork = true;
 		//StartCoroutine ("FindList_of_speed");
-		FindList_of_speed ();
+		//FindList_of_speed ();
 	}
 
 	[System.NonSerialized]
@@ -60,19 +97,24 @@ public class Algorightm : MonoBehaviour {
 		{
 			while (threads.Count < _points.Count) 
 			{
-				threads.Add (new Thread (this));
+				threads.Add (new MyThread (this));
 			}
 			for (i = 0; i < _lines.Count; i++) 
 			{
+				//print (i);
 				for (j = 0; j < _points.Count; j++) 
 				{
 					k = (i + j) % _lines.Count;
 					threads [j].Start (_lines[k].LeftConer,_lines[k].RightConer,_points[j],options.TestGamma);
 				}
-				while (false&&count_of_thread > 0) 
+				while (count_of_thread > 0) 
 				{
 					//print (count_of_thread);
 					//yield return new WaitForSeconds (0);
+					//thread.Join();
+					if (isTime_exit)
+						return;
+					//Thread.Sleep (250);
 				}
 				for (j = 0; j < _points.Count; j++) 
 				{
@@ -87,27 +129,35 @@ public class Algorightm : MonoBehaviour {
 		{
 			while (threads.Count < _lines.Count) 
 			{
-				threads.Add (new Thread (this));
+				threads.Add (new MyThread (this));
 			}
-			for (i = 0; i < _points.Count; i++) {
-				for (j = 0; j < _lines.Count; j++) {
+			for (i = 0; i < _points.Count; i++) 
+			{
+				//print (i);
+				for (j = 0; j < _lines.Count; j++) 
+				{
 					k = (i + j) % _points.Count;
 					threads [j].Start (_lines [j].LeftConer, _lines [j].RightConer, _points [k], options.TestGamma);
 				}
-				while (false&&count_of_thread > 0) 
+				while (count_of_thread > 0) 
 				{
+					//print ("count_of_thread:"+count_of_thread);
 					//yield return new WaitForSeconds (0);
+					//thread.Join();
+					if (isTime_exit)
+						return;
+					//Thread.Sleep(250);
 				}
 				for (j = 0; j < _lines.Count; j++) 
 				{
 					k = (i + j) % _points.Count;
 					//print (j + " " + lists_of_speed.Count);
-					lists_of_speed [k] += threads [j].V*10;
+					lists_of_speed [k] += threads [j].V;
 				}
 			}
 			
 		}
-		//print ("end Work");
+		print ("end Work");
 		isWork = false;
 	}
 
@@ -121,17 +171,20 @@ public class Algorightm : MonoBehaviour {
 	
 
 }
-public class Thread:MonoBehaviour
+public class MyThread:MonoBehaviour
 {
 	Algorightm _algo;
 	float Gamma;
 	Vector3 A;
 	Vector3 B;
 	Vector3 M;
+	Thread thread;
 	public Vector3 V;
-	public Thread(Algorightm algo)
+	public MyThread(Algorightm algo)
 	{
 		_algo=algo;
+		thread = new Thread (update);
+		thread.Start ();
 	}
 	public void Start(Vector3 a,Vector3 b,Vector3 m,float gamma)
 	{
@@ -139,16 +192,37 @@ public class Thread:MonoBehaviour
 		B = b;
 		M = m;
 		Gamma = gamma;
-		_algo.count_of_thread++;
+		_algo.plus(1);
 		//print ("++");
 		//StartCoroutine ("_Start");
-		_Start();
-		//print ("--?");
-	}
 
+		//print ("--?");
+		Time_to_Start=true;
+		//_Start();
+
+	}
+	bool Time_to_Start=false;
+	bool Time_to_Des=false;
+	public void Des()
+	{
+		Time_to_Des = true;
+	}
+	void update()
+	{
+		//print("thread:"+thread.ManagedThreadId);
+		while (!Time_to_Des) 
+		{
+			if (Time_to_Start) 
+			{
+				Time_to_Start = false;
+				_Start ();
+			}
+		}
+	}
 	void _Start()
 	{
 		//print ("_Start");
+		//print ("Start:" + Thread.GetDomainID ());
 		Vector3 AB = B - A;
 		Vector3 AM = M - A;
 		Vector3 BM = M - B;
@@ -165,12 +239,14 @@ public class Thread:MonoBehaviour
 		V = Algorightm.getMagicVec(AM,AB)*v;
 		//yield return new WaitForSeconds (0);
 		End ();
+		//print ("End:" + Thread.GetDomainID ());
 	}
 
 	void End ()
 	{
 		//print ("--");
-		//_algo.count_of_thread--;
+		_algo.plus(-1);
+		print ("Hel" + thread.ManagedThreadId);
 	}
 
 }

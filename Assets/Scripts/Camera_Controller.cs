@@ -9,7 +9,7 @@ public class Camera_Controller : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-	
+		
 	}
 	
 	// Update is called once per frame
@@ -47,7 +47,7 @@ public class Camera_Controller : MonoBehaviour {
 				list.Add (vec);
 			}
 		}
-		print (list.Count);
+		//print (list.Count);
 		return list;
 	}
 

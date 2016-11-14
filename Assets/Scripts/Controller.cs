@@ -1,7 +1,37 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
+public class Test:MonoBehaviour
+{
+	public Thread thread;
+	public Test()
+	{
+		thread = new Thread (test);
+		thread.Start ();
+	}
+	public bool isWork=true;
+	int i=0;
+	public void test()
+	{
+		while (isWork) 
+		{
+			print ("Hello World:"+i);
+			i++;
+			Thread.Sleep (1000);
+		}
+	}
+	void OnApplicationQuit()
+	{
+		print ("Hello World BBBBBBBBBBBBBBBBBBBBBB");
+		isWork = false;
+	}
+	public void start()
+	{
+		thread.Start ();
+	}
+}
 public class Controller : MonoBehaviour {
 
 	public OBJECTS Obj;
@@ -15,7 +45,6 @@ public class Controller : MonoBehaviour {
 	List<Edge> vectors;
 
 
-	// Use this for initialization
 	void Start () 
 	{
 		points = new List<GameObject> ();
@@ -24,14 +53,14 @@ public class Controller : MonoBehaviour {
 		//
 		//addLines (options.list);
 		options.list = new List<Vector3> ();
-		for (float x = 0; x <= 2; x += 1) 
+		for (float x = 0; x <= 2; x += 1f) 
 		{
 			options.list.Add (new Vector3 (x*10,x*x*10 , 0));
 			//print (x + " " + x * x);
 		}
 		addLines (options.list);
 		options.list.Clear();
-		for (float x = 0; x >= -2; x -= 1) 
+		for (float x = 0; x >= -2; x -= 1f) 
 		{
 			options.list.Add (new Vector3 (x*10,x*x*10 , 0));
 			//print (x + " " + x * x);
@@ -39,12 +68,38 @@ public class Controller : MonoBehaviour {
 		addLines (options.list);
 		options.list.Clear();
 		//
+		//test = new Test ();
+	}
+
+	void OnApplicationQuit()
+	{
+		print ("Hello World AAAAAAAAAAAAAAAAAAAAAA I Can FLYYYYYYYYYYYYYYYYYYY...BOOMMMMMMM");
+		//test.isWork = false;
+		Obj.algo.Des_Time();
 	}
 	
 	// Update is called once per frame
 	bool wait=false;
+	float time=0;
+	Test test;
 	void Update () 
 	{
+		/*/
+		time += Time.deltaTime;
+		if (time >= 3) 
+		{
+			time = 0;
+			if (test.isWork) {
+				test.isWork = false;
+			} 
+			else 
+			{
+				//test.thread.Suspend ();
+				test.isWork = true;
+				test.start ();
+			}
+		}
+		/*/
 		if (wait) 
 		{
 			if (!Obj.algo.isWork) 
