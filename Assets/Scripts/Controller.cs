@@ -43,6 +43,7 @@ public class Controller : MonoBehaviour {
 	List<Vector3> vec_points;
 	List<Edge> lines;
 	List<Edge> vectors;
+	List<Line> vectors_line;
 
 
 	void Start () 
@@ -50,17 +51,18 @@ public class Controller : MonoBehaviour {
 		points = new List<GameObject> ();
 		lines = new List<Edge>  ();
 		vectors = new List<Edge> ();
+		vectors_line = new List<Line> ();
 		//
 		//addLines (options.list);
 		options.list = new List<Vector3> ();
-		for (float x = 0; x <= 2; x += 1f) 
+		for (float x = -2; x <= 2; x += 1f) 
 		{
 			options.list.Add (new Vector3 (x*10,x*x*10 , 0));
 			//print (x + " " + x * x);
 		}
 		addLines (options.list);
 		options.list.Clear();
-		for (float x = 0; x >= -2; x -= 1f) 
+		for (float x = -3; x >= -2; x -= 0.001f) 
 		{
 			options.list.Add (new Vector3 (x*10,x*x*10 , 0));
 			//print (x + " " + x * x);
@@ -76,12 +78,14 @@ public class Controller : MonoBehaviour {
 		print ("Hello World AAAAAAAAAAAAAAAAAAAAAA I Can FLYYYYYYYYYYYYYYYYYYY...BOOMMMMMMM");
 		//test.isWork = false;
 		Obj.algo.Des_Time();
+		Remove_everything ();
 	}
 	
 	// Update is called once per frame
 	bool wait=false;
 	float time=0;
 	Test test;
+	int sup_Index_of_Vectors_list=0;
 	void Update () 
 	{
 		/*/
@@ -100,6 +104,10 @@ public class Controller : MonoBehaviour {
 			}
 		}
 		/*/
+		if (Input.GetButtonUp ("Clear vector field")) 
+		{
+			Clear_Vectors_list ();
+		}
 		if (wait) 
 		{
 			if (!Obj.algo.isWork) 
@@ -108,9 +116,8 @@ public class Controller : MonoBehaviour {
 				addVectors(vec_points,Obj.algo.lists_of_speed);
 				wait = false;
 			}
-			return;
 		}
-		if(Input.GetMouseButtonUp(0))
+		else if(Input.GetButtonUp("Create vector field"))
 		{
 			vec_points = Obj.Cam_cont.getVector_of_point ();
 			//new List<Vector3> ();
@@ -118,6 +125,47 @@ public class Controller : MonoBehaviour {
 			Obj.algo.FindVector_of_speed (lines, vec_points);
 			wait = true;
 			print ("Start");
+		}
+	}
+
+	void Clear_Vectors_list()
+	{
+		if (!options.isTime_for_Light_Render) {
+			for (int i = 0; i < vectors.Count; i++) {
+				vectors [i].gameObject.SetActive (false);
+			}
+		} else {
+			for (int i = 0; i < vectors_line.Count; i++) {
+				vectors_line [i].Clear ();
+			}
+		}
+		sup_Index_of_Vectors_list = 0;
+	}
+
+	void Remove_everything()
+	{
+		for (int i = 0; i < vectors.Count; i++) 
+		{
+			MonoBehaviour.Destroy (vectors [i].gameObject);
+			//vectors[i].gameObject.
+		}
+		vectors.Clear();
+		sup_Index_of_Vectors_list = 0;
+
+		for (int i = 0; i < lines.Count; i++) 
+		{
+			MonoBehaviour.Destroy (lines [i].gameObject);
+		}
+		lines.Clear ();
+
+		for (int i = 0; i < points.Count; i++) 
+		{
+			MonoBehaviour.Destroy (points [i].gameObject);
+		}
+
+		for (int i = 0; i < vectors_line.Count; i++) 
+		{
+			MonoBehaviour.Destroy (vectors_line [i].gameObject);
 		}
 	}
 
@@ -161,24 +209,66 @@ public class Controller : MonoBehaviour {
 		return line;
 	}
 
-	public Edge addVector(Vector3 start,Vector3 end)
+	public void addVector(Vector3 start,Vector3 end)
 	{
-		Edge vector = (Object.Instantiate (clones.vector, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Edge>();
-		vectors.Add (vector);
-		vector.set(start,end);
-		vector.transform.SetParent (parents.Vectors.transform);
-		return vector;
-		
+		if (!options.isTime_for_Light_Render) 
+		{
+			if (sup_Index_of_Vectors_list >= vectors.Count) {
+				Edge vector = (Object.Instantiate (clones.vector, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Edge> ();
+				vectors.Add (vector);
+				vector.set (start, end);
+				vector.transform.SetParent (parents.Vectors.transform);
+				sup_Index_of_Vectors_list++;
+				//return vector;
+			} else {
+				vectors [sup_Index_of_Vectors_list].set (start, end);
+				vectors [sup_Index_of_Vectors_list].gameObject.SetActive (true);
+				//return vectors [sup_Index_of_Vectors_list++];
+			}
+		} 
+		else 
+		{
+			if (sup_Index_of_Vectors_list >= vectors.Count) {
+				Line vector = (Object.Instantiate (clones.line, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Line> ();
+				vectors_line.Add (vector);
+				List<Vector3> list=new List<Vector3>();
+				list.Add (start);
+				list.Add (end);
+				vector.addFunctionPoints (list);
+				vector.transform.SetParent (parents.Vectors.transform);
+				sup_Index_of_Vectors_list++;
+				//return vector;
+			} else {
+				List<Vector3> list=new List<Vector3>();
+				list.Add (start);
+				list.Add (end);
+				vectors_line[sup_Index_of_Vectors_list].gameObject.SetActive (true);
+				vectors_line[sup_Index_of_Vectors_list].addFunctionPoints (list);
+				//return vectors [sup_Index_of_Vectors_list++];
+			}
+		}
+
 	}
 
 	public void addVectors(List<Vector3> points,List<Vector3> list_of_speed)
 	{
+		//
+		for (int i = 0; i < points.Count; i++) 
+		{
+			addVector (points [i], points [i] + list_of_speed [i]);
+		}
+		/*/
 		while (vectors.Count < points.Count) {
 			addVector(new Vector3(),new Vector3(1,0,0));
 		}
 		for (int i = 0; i < points.Count; i++) {
 			vectors [i].set (points [i], points [i] + list_of_speed [i]);
 		}
+		/*/
+	}
+	public void Clear()
+	{
+		
 	}
 
 	[System.Serializable]
@@ -206,5 +296,6 @@ public class Controller : MonoBehaviour {
 	public struct Options
 	{
 		public List<Vector3> list;
+		public bool isTime_for_Light_Render;
 	}
 }

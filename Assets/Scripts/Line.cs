@@ -158,7 +158,7 @@ public class Line : MonoBehaviour {
 		}
 		return;
 		/*/
-		if (list.Count < 3)
+		if (list.Count < 2)
 			return;
 		line_renderer.SetVertexCount (list.Count);
 		line_renderer.SetPosition (0, list [0]);
@@ -236,6 +236,12 @@ public class Line : MonoBehaviour {
 		toBegin ();
 		list.Add (_list [0]);
 	}
+	public void Clear()
+	{
+		function = new List<Vector3> ();
+		toBegin ();
+	}
+
 	public void setColor(Color begin,Color end)
 	{
 		line_renderer.SetColors (begin, end);

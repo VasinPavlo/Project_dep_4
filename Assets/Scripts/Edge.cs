@@ -38,6 +38,7 @@ public class Edge : MonoBehaviour {
 		//
 		anim = GetComponent<Animator> ();
 		//record = GameObject.FindGameObjectWithTag ("Recorder").GetComponent<Recorder> ();
+		set(LeftConer,RightConer);
 		//
 	}
 	/*/

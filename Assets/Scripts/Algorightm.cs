@@ -7,6 +7,7 @@ public class Algorightm : MonoBehaviour {
 
 	// Use this for initialization
 	public Options options;
+	public Objects Obj;
 	public List<Vector3>  lists_of_speed;
 	List<Edge> _lines;
 	List<Vector3> _points;
@@ -63,8 +64,12 @@ public class Algorightm : MonoBehaviour {
 			if (isTime_Start)
 			{
 				isTime_Start = false;
+				thread.Priority = System.Threading.ThreadPriority.AboveNormal;
+				print ("FindList_of_speed");
 				FindList_of_speed ();
+				thread.Priority = System.Threading.ThreadPriority.Lowest;
 			}
+			Thread.Sleep (0);
 		}
 	}
 
@@ -79,6 +84,7 @@ public class Algorightm : MonoBehaviour {
 		isWork = true;
 		//StartCoroutine ("FindList_of_speed");
 		//FindList_of_speed ();
+		print("FindVector_of_speed");
 	}
 
 	[System.NonSerialized]
@@ -101,20 +107,20 @@ public class Algorightm : MonoBehaviour {
 			}
 			for (i = 0; i < _lines.Count; i++) 
 			{
-				//print (i);
+				setNumber_in_main_canvas (i, _lines.Count,"% line");
 				for (j = 0; j < _points.Count; j++) 
 				{
 					k = (i + j) % _lines.Count;
 					threads [j].Start (_lines[k].LeftConer,_lines[k].RightConer,_points[j],options.TestGamma);
 				}
-				while (count_of_thread > 0) 
+				while (options.isThreding&&count_of_thread > 0) 
 				{
-					//print (count_of_thread);
+					print ("infin");
 					//yield return new WaitForSeconds (0);
 					//thread.Join();
 					if (isTime_exit)
 						return;
-					//Thread.Sleep (250);
+					Thread.Sleep (0);
 				}
 				for (j = 0; j < _points.Count; j++) 
 				{
@@ -134,19 +140,20 @@ public class Algorightm : MonoBehaviour {
 			for (i = 0; i < _points.Count; i++) 
 			{
 				//print (i);
+				setNumber_in_main_canvas(i,_points.Count,"% point");
 				for (j = 0; j < _lines.Count; j++) 
 				{
 					k = (i + j) % _points.Count;
 					threads [j].Start (_lines [j].LeftConer, _lines [j].RightConer, _points [k], options.TestGamma);
 				}
-				while (count_of_thread > 0) 
+				while (options.isThreding&&count_of_thread > 0) 
 				{
 					//print ("count_of_thread:"+count_of_thread);
 					//yield return new WaitForSeconds (0);
 					//thread.Join();
 					if (isTime_exit)
 						return;
-					//Thread.Sleep(250);
+					Thread.Sleep(0);
 				}
 				for (j = 0; j < _lines.Count; j++) 
 				{
@@ -159,6 +166,17 @@ public class Algorightm : MonoBehaviour {
 		}
 		print ("end Work");
 		isWork = false;
+		Clear_text_in_main_canvas ();
+	}
+
+	void setNumber_in_main_canvas(int a,int p,string text)
+	{
+		Obj.main_canvas.setText (a.ToString () + "/" + p.ToString ()+text);
+	}
+
+	void Clear_text_in_main_canvas()
+	{
+		Obj.main_canvas.setText ("");
 	}
 
 	[System.Serializable]
@@ -167,6 +185,12 @@ public class Algorightm : MonoBehaviour {
 		public float TestGamma;
 		public float deltaR;
 		public float deltaR2;
+		public bool isThreding;
+	}
+	[System.Serializable]
+	public struct Objects
+	{
+		public Main_Canvas main_canvas;
 	}
 	
 
@@ -183,8 +207,13 @@ public class MyThread:MonoBehaviour
 	public MyThread(Algorightm algo)
 	{
 		_algo=algo;
-		thread = new Thread (update);
-		thread.Start ();
+		if (algo.options.isThreding) 
+		{
+			thread = new Thread (update);
+			thread.IsBackground = true;
+
+			thread.Start ();
+		}
 	}
 	public void Start(Vector3 a,Vector3 b,Vector3 m,float gamma)
 	{
@@ -197,8 +226,10 @@ public class MyThread:MonoBehaviour
 		//StartCoroutine ("_Start");
 
 		//print ("--?");
-		Time_to_Start=true;
-		//_Start();
+		if(_algo.options.isThreding)
+			Time_to_Start=true;
+		else
+			_Start();
 
 	}
 	bool Time_to_Start=false;
@@ -215,8 +246,12 @@ public class MyThread:MonoBehaviour
 			if (Time_to_Start) 
 			{
 				Time_to_Start = false;
+				thread.Priority = System.Threading.ThreadPriority.AboveNormal;
+				print ("_Start");
 				_Start ();
+				thread.Priority = System.Threading.ThreadPriority.Lowest;
 			}
+			Thread.Sleep (0);
 		}
 	}
 	void _Start()
@@ -246,7 +281,7 @@ public class MyThread:MonoBehaviour
 	{
 		//print ("--");
 		_algo.plus(-1);
-		print ("Hel" + thread.ManagedThreadId);
+		//print ("Hel" + thread.ManagedThreadId);
 	}
 
 }
