@@ -11,6 +11,7 @@ public class Algorightm : MonoBehaviour {
 	public List<Vector3>  lists_of_speed;
 	List<Edge> _lines;
 	List<Vector3> _points;
+	List<Vector3> _lines_2;
 	List<MyThread> threads;
 	Thread thread;
 	[System.NonSerialized]
@@ -20,10 +21,13 @@ public class Algorightm : MonoBehaviour {
 	void Awake () 
 	{
 		//print ("Hello World");
+		options.isVector3Line = Obj.cont.options.isTime_for_Light_Render_Grafick;
 		threads = new List<MyThread> ();
 		thread = new Thread (update);
 
 		thread.Start();
+
+
 	}
 
 	public void plus(int a)
@@ -34,6 +38,7 @@ public class Algorightm : MonoBehaviour {
 
 	public void Des_Time()
 	{
+		return;
 		for (int i = 0; i < threads.Count; i++) 
 		{
 			threads [i].Des ();
@@ -61,13 +66,14 @@ public class Algorightm : MonoBehaviour {
 		print("thread algorithm:"+thread.ManagedThreadId);
 		while (!isTime_exit) 
 		{
+			//print ("Hello " + thread.ManagedThreadId);
 			if (isTime_Start)
 			{
 				isTime_Start = false;
-				thread.Priority = System.Threading.ThreadPriority.AboveNormal;
+				thread.Priority = System.Threading.ThreadPriority.Normal;
 				print ("FindList_of_speed");
 				FindList_of_speed ();
-				thread.Priority = System.Threading.ThreadPriority.Lowest;
+				thread.Priority = System.Threading.ThreadPriority.Normal;
 			}
 			Thread.Sleep (0);
 		}
@@ -87,82 +93,166 @@ public class Algorightm : MonoBehaviour {
 		print("FindVector_of_speed");
 	}
 
+	public void FindVector_of_speed(List<Vector3> _lines,List<Vector3> points)
+	{
+		if(isWork)
+			return;
+		_lines_2=_lines;
+		_points=points;
+		isTime_Start=true;
+		isWork=true;
+	}
+
 	[System.NonSerialized]
 	public int count_of_thread;
 
 	void FindList_of_speed()
 	{
-		//print ("Find List of speed");
+		print ("Find List of speed");
 		int i, j, k;
 		lists_of_speed = new List<Vector3> ();
 		for (i = 0; i < _points.Count; i++) {
 			lists_of_speed.Add (new Vector3 ());
 		}
 		count_of_thread = 0;
-		if (_points.Count < _lines.Count) 
+		if (options.isVector3Line) 
 		{
-			while (threads.Count < _points.Count) 
+			if (_points.Count < _lines_2.Count-1) 
 			{
-				threads.Add (new MyThread (this));
-			}
-			for (i = 0; i < _lines.Count; i++) 
-			{
-				setNumber_in_main_canvas (i, _lines.Count,"% line");
-				for (j = 0; j < _points.Count; j++) 
+				while (threads.Count < _points.Count) 
 				{
-					k = (i + j) % _lines.Count;
-					threads [j].Start (_lines[k].LeftConer,_lines[k].RightConer,_points[j],options.TestGamma);
+					threads.Add (new MyThread (this));
 				}
-				while (options.isThreding&&count_of_thread > 0) 
+				for (i = 0; i < _lines_2.Count-1; i++) 
 				{
-					print ("infin");
-					//yield return new WaitForSeconds (0);
-					//thread.Join();
-					if (isTime_exit)
-						return;
+
+					setNumber_in_main_canvas (i, _lines_2.Count-1,"% line");
+					for (j = 0; j < _points.Count; j++) 
+					{
+						k = (i + j) % (_lines_2.Count-1);
+						threads [j].Start (_lines_2[k],_lines_2[k+1],_points[j],options.TestGamma);
+					}
+					while (options.isThreding&&count_of_thread > 0) 
+					{
+						//print ("infin");
+						//yield return new WaitForSeconds (0);
+						//thread.Join();
+						if (isTime_exit)
+							return;
+						Thread.Sleep (0);
+					}
+					for (j = 0; j < _points.Count; j++) 
+					{
+						k = (i + j) % _lines_2.Count-1;
+						//print (lists_of_speed.Count + "-" + k);
+						lists_of_speed [j] += threads [j].V;
+					}
 					Thread.Sleep (0);
+
 				}
-				for (j = 0; j < _points.Count; j++) 
+			} 
+			else 
+			{
+				while (threads.Count < _lines_2.Count-1) 
 				{
-					k = (i + j) % _lines.Count;
-					//print (lists_of_speed.Count + "-" + k);
-					lists_of_speed [j] += threads [j].V;
+					threads.Add (new MyThread (this));
+				}
+				for (i = 0; i < _points.Count; i++) 
+				{
+					//print (i);
+					setNumber_in_main_canvas(i,_points.Count,"% point");
+					for (j = 0; j < _lines_2.Count-1; j++) 
+					{
+						k = (i + j) % _points.Count;
+						threads [j].Start (_lines_2 [j], _lines_2 [j+1], _points [k], options.TestGamma);
+					}
+					while (options.isThreding&&count_of_thread > 0) 
+					{
+						//print ("count_of_thread:"+count_of_thread);
+						//yield return new WaitForSeconds (0);
+						//thread.Join();
+						if (isTime_exit)
+							return;
+						Thread.Sleep(0);
+					}
+					for (j = 0; j < _lines_2.Count-1; j++) 
+					{
+						k = (i + j) % _points.Count;
+						//print (j + " " + lists_of_speed.Count);
+						lists_of_speed [k] += threads [j].V;
+					}
+					Thread.Sleep (0);
 				}
 
 			}
 		} 
 		else 
 		{
-			while (threads.Count < _lines.Count) 
+			if (_points.Count < _lines.Count) 
 			{
-				threads.Add (new MyThread (this));
-			}
-			for (i = 0; i < _points.Count; i++) 
+				while (threads.Count < _points.Count) 
+				{
+					threads.Add (new MyThread (this));
+				}
+				for (i = 0; i < _lines.Count; i++) 
+				{
+					setNumber_in_main_canvas (i, _lines.Count,"% line");
+					for (j = 0; j < _points.Count; j++) 
+					{
+						k = (i + j) % _lines.Count;
+						threads [j].Start (_lines[k].LeftConer,_lines[k].RightConer,_points[j],options.TestGamma);
+					}
+					while (options.isThreding&&count_of_thread > 0) 
+					{
+						//print ("infin");
+						//yield return new WaitForSeconds (0);
+						//thread.Join();
+						if (isTime_exit)
+							return;
+						Thread.Sleep (0);
+					}
+					for (j = 0; j < _points.Count; j++) 
+					{
+						k = (i + j) % _lines.Count;
+						//print (lists_of_speed.Count + "-" + k);
+						lists_of_speed [j] += threads [j].V;
+					}
+
+				}
+			} 
+			else 
 			{
-				//print (i);
-				setNumber_in_main_canvas(i,_points.Count,"% point");
-				for (j = 0; j < _lines.Count; j++) 
+				while (threads.Count < _lines.Count) 
 				{
-					k = (i + j) % _points.Count;
-					threads [j].Start (_lines [j].LeftConer, _lines [j].RightConer, _points [k], options.TestGamma);
+					threads.Add (new MyThread (this));
 				}
-				while (options.isThreding&&count_of_thread > 0) 
+				for (i = 0; i < _points.Count; i++) 
 				{
-					//print ("count_of_thread:"+count_of_thread);
-					//yield return new WaitForSeconds (0);
-					//thread.Join();
-					if (isTime_exit)
-						return;
-					Thread.Sleep(0);
+					//print (i);
+					setNumber_in_main_canvas(i,_points.Count,"% point");
+					for (j = 0; j < _lines.Count; j++) 
+					{
+						k = (i + j) % _points.Count;
+						threads [j].Start (_lines [j].LeftConer, _lines [j].RightConer, _points [k], options.TestGamma);
+					}
+					while (options.isThreding&&count_of_thread > 0) 
+					{
+						//print ("count_of_thread:"+count_of_thread);
+						//yield return new WaitForSeconds (0);
+						//thread.Join();
+						if (isTime_exit)
+							return;
+						Thread.Sleep(0);
+					}
+					for (j = 0; j < _lines.Count; j++) 
+					{
+						k = (i + j) % _points.Count;
+						//print (j + " " + lists_of_speed.Count);
+						lists_of_speed [k] += threads [j].V;
+					}
 				}
-				for (j = 0; j < _lines.Count; j++) 
-				{
-					k = (i + j) % _points.Count;
-					//print (j + " " + lists_of_speed.Count);
-					lists_of_speed [k] += threads [j].V;
-				}
+
 			}
-			
 		}
 		print ("end Work");
 		isWork = false;
@@ -171,6 +261,7 @@ public class Algorightm : MonoBehaviour {
 
 	void setNumber_in_main_canvas(int a,int p,string text)
 	{
+		//print (a.ToString () + "/" + p.ToString () + text);
 		Obj.main_canvas.setText (a.ToString () + "/" + p.ToString ()+text);
 	}
 
@@ -186,11 +277,13 @@ public class Algorightm : MonoBehaviour {
 		public float deltaR;
 		public float deltaR2;
 		public bool isThreding;
+		public bool isVector3Line;
 	}
 	[System.Serializable]
 	public struct Objects
 	{
 		public Main_Canvas main_canvas;
+		public Controller cont;
 	}
 	
 

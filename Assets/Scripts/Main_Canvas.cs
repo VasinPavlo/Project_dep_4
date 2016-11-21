@@ -16,15 +16,20 @@ public class Main_Canvas : MonoBehaviour {
 	{
 		if (isTime_to_update_text) 
 		{
-			isTime_to_update_text = false;
 			Obj.text.text = text_for_update;
+			isTime_to_update_text = false;
 		}
 	}
 	string text_for_update;
+
 	public void setText(string text)
 	{
-		text_for_update = text;
-		isTime_to_update_text=true;
+		if (!isTime_to_update_text) 
+		{
+			print ("AAAAAAAAAAAAAAAAAAA");
+			text_for_update = text;
+			isTime_to_update_text = true;
+		}
 	}
 
 	[System.Serializable]

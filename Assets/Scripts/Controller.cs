@@ -41,21 +41,28 @@ public class Controller : MonoBehaviour {
 
 	List<GameObject> points;
 	List<Vector3> vec_points;
+	List<Vector3> vec_of_lines;
+	List<Line> vec_of_Lines;
 	List<Edge> lines;
 	List<Edge> vectors;
 	List<Line> vectors_line;
+	List<Line> vectors_line_1;
 
 
 	void Start () 
 	{
+		
 		points = new List<GameObject> ();
 		lines = new List<Edge>  ();
 		vectors = new List<Edge> ();
 		vectors_line = new List<Line> ();
+		vec_of_lines = new List<Vector3> ();
+		vec_of_Lines = new List<Line> ();
+		vectors_line_1 = new List<Line> ();
 		//
 		//addLines (options.list);
 		options.list = new List<Vector3> ();
-		for (float x = -2; x <= 2; x += 1f) 
+		for (float x = -2; x <= 2; x += 0.1f) 
 		{
 			options.list.Add (new Vector3 (x*10,x*x*10 , 0));
 			//print (x + " " + x * x);
@@ -85,7 +92,9 @@ public class Controller : MonoBehaviour {
 	bool wait=false;
 	float time=0;
 	Test test;
-	int sup_Index_of_Vectors_list=0;
+	int sup_Index_of_Vectors_list_0=0;
+	int sup_Index_of_Vectors_list_1=0;
+	int sup_Index_of_Vectors_list_2=0;
 	void Update () 
 	{
 		/*/
@@ -122,7 +131,14 @@ public class Controller : MonoBehaviour {
 			vec_points = Obj.Cam_cont.getVector_of_point ();
 			//new List<Vector3> ();
 			//vec_points.Add (Obj.Cam_cont.getMousePosition ());
-			Obj.algo.FindVector_of_speed (lines, vec_points);
+			if (options.isTime_for_Light_Render_Grafick) 
+			{
+				Obj.algo.FindVector_of_speed (vec_of_lines, vec_points);
+			} 
+			else 
+			{
+				Obj.algo.FindVector_of_speed (lines, vec_points);
+			}
 			wait = true;
 			print ("Start");
 		}
@@ -130,16 +146,27 @@ public class Controller : MonoBehaviour {
 
 	void Clear_Vectors_list()
 	{
-		if (!options.isTime_for_Light_Render) {
+		switch (options.isTime_for_Light_Render_Vector) 
+		{
+		case 0:
 			for (int i = 0; i < vectors.Count; i++) {
 				vectors [i].gameObject.SetActive (false);
 			}
-		} else {
+			sup_Index_of_Vectors_list_0 = 0;
+			break;
+		case 1:
 			for (int i = 0; i < vectors_line.Count; i++) {
 				vectors_line [i].Clear ();
 			}
+			sup_Index_of_Vectors_list_1 = 0;
+			break;
+		case 2:
+			for (int i = 0; i < vectors_line.Count; i++) {
+				vectors_line_1 [i].Clear ();
+			}
+			sup_Index_of_Vectors_list_2 = 0;
+			break;
 		}
-		sup_Index_of_Vectors_list = 0;
 	}
 
 	void Remove_everything()
@@ -150,7 +177,7 @@ public class Controller : MonoBehaviour {
 			//vectors[i].gameObject.
 		}
 		vectors.Clear();
-		sup_Index_of_Vectors_list = 0;
+		sup_Index_of_Vectors_list_1 = 0;
 
 		for (int i = 0; i < lines.Count; i++) 
 		{
@@ -190,12 +217,31 @@ public class Controller : MonoBehaviour {
 
 	public void addLines(List<Vector3> list)
 	{
-		List<Edge> line=new List<Edge>();
-		for (int i = 0; i < list.Count - 1; i++) 
+		if (list.Count < 2)
+			return;
+		if (!options.isTime_for_Light_Render_Grafick) 
 		{
-			Edge edge = addLine (list [i], list [i + 1]);
-			lines.Add (edge);
-			//addPoint (list [i]);
+			//List<Edge> line = new List<Edge> ();
+			for (int i = 0; i < list.Count - 1; i++) 
+			{
+				Edge edge = addLine (list [i], list [i + 1]);
+				lines.Add (edge);
+				//addPoint (list [i]);
+			}
+		} 
+		else 
+		{
+			print ("Hello World of Light Render");
+			Line line = (MonoBehaviour.Instantiate (clones.line_2, new Vector3 (), Quaternion.Euler (0, 0, 0))as GameObject).GetComponent<Line> ();
+			vec_of_Lines.Add (line);
+			List<Vector3> _list = new List<Vector3> ();
+			for (int i = 0; i < list.Count; i++) 
+			{
+				vec_of_lines.Add (list [i]);
+				_list.Add (list [i]);
+			}
+			line.addFunctionPoints (_list);
+			line.transform.SetParent (parents.Lines.transform);
 		}
 		//addPoint (list [list.Count - 1]);
 	}
@@ -211,24 +257,25 @@ public class Controller : MonoBehaviour {
 
 	public void addVector(Vector3 start,Vector3 end)
 	{
-		if (!options.isTime_for_Light_Render) 
+		switch (options.isTime_for_Light_Render_Vector) 
 		{
-			if (sup_Index_of_Vectors_list >= vectors.Count) {
+		case 0:
+			if (sup_Index_of_Vectors_list_0 >= vectors.Count) {
 				Edge vector = (Object.Instantiate (clones.vector, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Edge> ();
 				vectors.Add (vector);
 				vector.set (start, end);
 				vector.transform.SetParent (parents.Vectors.transform);
-				sup_Index_of_Vectors_list++;
+				sup_Index_of_Vectors_list_0++;
 				//return vector;
 			} else {
-				vectors [sup_Index_of_Vectors_list].set (start, end);
-				vectors [sup_Index_of_Vectors_list].gameObject.SetActive (true);
+				vectors [sup_Index_of_Vectors_list_0].set (start, end);
+				vectors [sup_Index_of_Vectors_list_0].gameObject.SetActive (true);
 				//return vectors [sup_Index_of_Vectors_list++];
 			}
-		} 
-		else 
-		{
-			if (sup_Index_of_Vectors_list >= vectors.Count) {
+			break;
+		case 1:
+			if (sup_Index_of_Vectors_list_1 >= vectors.Count) 
+			{
 				Line vector = (Object.Instantiate (clones.line, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Line> ();
 				vectors_line.Add (vector);
 				List<Vector3> list=new List<Vector3>();
@@ -236,16 +283,39 @@ public class Controller : MonoBehaviour {
 				list.Add (end);
 				vector.addFunctionPoints (list);
 				vector.transform.SetParent (parents.Vectors.transform);
-				sup_Index_of_Vectors_list++;
+				sup_Index_of_Vectors_list_1++;
 				//return vector;
 			} else {
 				List<Vector3> list=new List<Vector3>();
 				list.Add (start);
 				list.Add (end);
-				vectors_line[sup_Index_of_Vectors_list].gameObject.SetActive (true);
-				vectors_line[sup_Index_of_Vectors_list].addFunctionPoints (list);
+				vectors_line[sup_Index_of_Vectors_list_1].gameObject.SetActive (true);
+				vectors_line[sup_Index_of_Vectors_list_1].addFunctionPoints (list);
 				//return vectors [sup_Index_of_Vectors_list++];
 			}
+			break;
+		case 2:
+			if (sup_Index_of_Vectors_list_2 >= vectors.Count) 
+			{
+				Line vector = (Object.Instantiate (clones.line_1, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Line> ();
+				vectors_line_1.Add (vector);
+				List<Vector3> list=new List<Vector3>();
+				list.Add (start);
+				list.Add (end);
+				vector.addFunctionPoints (list);
+				vector.transform.SetParent (parents.Vectors.transform);
+				sup_Index_of_Vectors_list_2++;
+				//return vector;
+			} else {
+				List<Vector3> list=new List<Vector3>();
+				list.Add (start);
+				list.Add (end);
+				vectors_line_1[sup_Index_of_Vectors_list_1].gameObject.SetActive (true);
+				vectors_line_1[sup_Index_of_Vectors_list_1].addFunctionPoints (list);
+				sup_Index_of_Vectors_list_2++;
+				//return vectors [sup_Index_of_Vectors_list++];
+			}
+			break;
 		}
 
 	}
@@ -281,6 +351,8 @@ public class Controller : MonoBehaviour {
 	public struct CLONE_OF_OBJECTS
 	{
 		public GameObject line;
+		public GameObject line_1;
+		public GameObject line_2;
 		public GameObject point;
 		public GameObject edge;
 		public GameObject vector;
@@ -296,6 +368,7 @@ public class Controller : MonoBehaviour {
 	public struct Options
 	{
 		public List<Vector3> list;
-		public bool isTime_for_Light_Render;
+		public int isTime_for_Light_Render_Vector;
+		public bool isTime_for_Light_Render_Grafick;
 	}
 }

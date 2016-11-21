@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 public enum State_of_Line{Const_Lenght,Without_Restrictions,Flesh,Flesh_End,End_Time};
 public class Line : MonoBehaviour {
+	/*/
 	public float speed=100f;
 	public float magnitude=10f;
 	public float magnitude_speed=1f;
@@ -10,7 +11,9 @@ public class Line : MonoBehaviour {
 	public static bool magicSin=true;
 	public static bool isTimeForSin=false;
 	public State_of_Line state=State_of_Line.Without_Restrictions;
+	/*/
 	//private Vector3[]
+	public Options options;
 	private List<Vector3> list;
 	private List<Vector3> function;
 	private LineRenderer line_renderer;
@@ -51,13 +54,13 @@ public class Line : MonoBehaviour {
 	}
 	void Update() 
 	{
-		if(true||!magicSin)
+		if(true||!options.magicSin)
 		{
 			list=function;
-			isTimeForSin=false;
+			options.isTimeForSin=false;
 			return;
 		}
-		switch(state)
+		switch(options.state)
 		{
 		case State_of_Line.Without_Restrictions:
 		{
@@ -65,7 +68,7 @@ public class Line : MonoBehaviour {
 		}
 		case State_of_Line.Const_Lenght:
 		{
-			while(list.Count+1> const_length)
+			while(list.Count+1> options.const_length)
 			{
 				list.RemoveAt(0);
 				min_Index++;
@@ -109,14 +112,14 @@ public class Line : MonoBehaviour {
 		}
 		if (Index >= function.Count||function.Count<=0)
 		{
-			if(isDestroyTime&&state==State_of_Line.Const_Lenght)
-				state=State_of_Line.End_Time;
+			if(isDestroyTime&&options.state==State_of_Line.Const_Lenght)
+				options.state=State_of_Line.End_Time;
 			return;
 		}
 		if (list.Count <= 0)
 			return;
 		lastIndex=list.Count-1;
-		_speed = speed * 0.0197486f;//*Time.deltaTime;
+		_speed = options.speed * 0.0197486f;//*Time.deltaTime;
 		//print (list [lastIndex].ToString() + function [Index].ToString());
 		distance = Vector3.Distance (list [lastIndex], function [Index]);
 		//print (distance+">"+Time.deltaTime);
@@ -164,11 +167,11 @@ public class Line : MonoBehaviour {
 		line_renderer.SetPosition (0, list [0]);
 		line_renderer.SetPosition (list.Count-1, list[list.Count-1]);
 		isDestroyTime = true;
-		if(isTimeForSin)
+		if(options.isTimeForSin)
 		{
 			if(Index_of_Wave<list.Count-1)
 			{
-				if(state==State_of_Line.Flesh)
+				if(options.state==State_of_Line.Flesh)
 				{
 					Index_of_Wave=list.Count-1;
 				}
@@ -177,14 +180,14 @@ public class Line : MonoBehaviour {
 			}
 			for(int i=1;i<Index_of_Wave;i++)//
 			{
-				line_renderer.SetPosition  (i,getCrazyPoint(list[i],list[i+1]-list[i-1],-Mathf.Sin(i+min_Index+Time.time*magnitude_speed)));
+				line_renderer.SetPosition  (i,getCrazyPoint(list[i],list[i+1]-list[i-1],-Mathf.Sin(i+min_Index+Time.time*options.magnitude_speed)));
 			}
 		}
 		else
 		{
 			if(Index_of_Wave>1)
 			{
-				if(state==State_of_Line.Flesh)
+				if(options.state==State_of_Line.Flesh)
 				{
 					Index_of_Wave=1;
 				}
@@ -197,7 +200,7 @@ public class Line : MonoBehaviour {
 			}
 			for(int i=list.Count-Index_of_Wave;i<list.Count-1;i++)//
 			{
-				line_renderer.SetPosition  (i,getCrazyPoint(list[i],list[i+1]-list[i-1],-Mathf.Sin(i+min_Index+Time.time*magnitude_speed)));
+				line_renderer.SetPosition  (i,getCrazyPoint(list[i],list[i+1]-list[i-1],-Mathf.Sin(i+min_Index+Time.time*options.magnitude_speed)));
 			}
 		}
 	}
@@ -209,7 +212,7 @@ public class Line : MonoBehaviour {
 		vec.x = -vec.y;
 		vec.y = _x;
 		//
-		return point+vec*sin/vec.magnitude*magnitude;
+		return point+vec*sin/vec.magnitude*options.magnitude;
 	}
 	void toBegin()
 	{
@@ -233,12 +236,29 @@ public class Line : MonoBehaviour {
 		if (_list == null || _list.Count == 0)
 			return;
 		function = _list;
+		//print (function.Count + " count");
 		toBegin ();
 		list.Add (_list [0]);
+		if (options.arrow != null&&_list.Count>=2) 
+		{
+			Vector3 start, end;
+			start = _list [_list.Count - 2];
+			end = _list [_list.Count - 1];
+			start = Vector3.Lerp (start, end, 0.5f);
+
+			List<Vector3> vec = new List<Vector3> ();
+			vec.Add (start);
+			vec.Add (end);
+			options.arrow.addFunctionPoints (vec);
+		}
 	}
 	public void Clear()
 	{
 		function = new List<Vector3> ();
+		if (options.arrow != null) 
+		{
+			options.arrow.Clear ();
+		}
 		toBegin ();
 	}
 
@@ -255,14 +275,14 @@ public class Line : MonoBehaviour {
 		while (true) 
 		{
 			if (Index >= function.Count || function.Count <= 0) {
-				if (isDestroyTime && state == State_of_Line.Const_Lenght)
-					state = State_of_Line.End_Time;
+				if (isDestroyTime && options.state == State_of_Line.Const_Lenght)
+					options.state = State_of_Line.End_Time;
 				return;
 			}
 			if (list.Count <= 0)
 				return;
 			lastIndex = list.Count - 1;
-			_speed = speed * 0.0197486f;//*Time.deltaTime;
+			_speed = options.speed * 0.0197486f;//*Time.deltaTime;
 			//print (list [lastIndex].ToString() + function [Index].ToString());
 			distance = Vector3.Distance (list [lastIndex], function [Index]);
 			//print (distance+">"+Time.deltaTime);
@@ -283,6 +303,19 @@ public class Line : MonoBehaviour {
 				list.Add (Vector3.MoveTowards (function [Index - 1], function [Index], _speed));
 			}
 		}
+	}
+
+	[System.Serializable]
+	public struct Options
+	{
+		public float speed;
+		public float magnitude;
+		public float magnitude_speed;
+		public int const_length;
+		public bool magicSin;
+		public bool isTimeForSin;
+		public State_of_Line state;
+		public Line arrow;
 	}
 
 }
