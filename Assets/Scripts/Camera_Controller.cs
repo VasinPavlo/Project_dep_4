@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 
 public class Camera_Controller : MonoBehaviour {
-    public OBJECTS objects;
+    public OBJECTS Obj;
     public SCRIPTS scripts;
     public OPTIONS options;
 	// Use this for initialization
@@ -21,6 +21,8 @@ public class Camera_Controller : MonoBehaviour {
 		//tiltAroundX = Input.GetAxis("Rotation up and down") * tiltAngle;
 		rotation();
 		zoom ();
+		move ();
+		true_zoom ();
 	}
 
 	public Vector3 getMousePosition()
@@ -29,21 +31,21 @@ public class Camera_Controller : MonoBehaviour {
 		//print(objects.mainCamera.ScreenToWorldPoint (new Vector3()));
 		//print(objects.mainCamera.WorldToScreenPoint(objects.mainCamera.ScreenToWorldPoint (new Vector3()))
 		//	+"=="+Input.mousePosition);
-		return objects.mainCamera.ScreenToWorldPoint (Input.mousePosition) + getK ();
+		return Obj.mainCamera.ScreenToWorldPoint (Input.mousePosition) + getK ();
 	}
 
 	public List<Vector3> getVector_of_point()
 	{
 		List<Vector3> list=new List<Vector3>();
-		float h = objects.rt_canvas.offsetMax.y-objects.rt_canvas.offsetMin.y;
-		float w = objects.rt_canvas.offsetMax.x-objects.rt_canvas.offsetMin.x;
+		float h = Obj.rt_canvas.offsetMax.y-Obj.rt_canvas.offsetMin.y;
+		float w = Obj.rt_canvas.offsetMax.x-Obj.rt_canvas.offsetMin.x;
 		float steph = h/(options.m-1);
 		float stepw = w / (options.n - 1);
 		Vector3 vec;
-		for (float x = objects.rt_canvas.offsetMin.x; x <= objects.rt_canvas.offsetMax.x; x+=stepw) {
-			for (float y = objects.rt_canvas.offsetMin.y; y <= objects.rt_canvas.offsetMax.y; y+=steph) {
+		for (float x = Obj.rt_canvas.offsetMin.x; x <= Obj.rt_canvas.offsetMax.x; x+=stepw) {
+			for (float y = Obj.rt_canvas.offsetMin.y; y <= Obj.rt_canvas.offsetMax.y; y+=steph) {
 				vec = new Vector3 (x, y, 0);
-				vec = objects.canvas.transform.TransformPoint (vec);
+				vec = Obj.canvas.transform.TransformPoint (vec);
 				list.Add (vec);
 			}
 		}
@@ -55,7 +57,7 @@ public class Camera_Controller : MonoBehaviour {
 	{
 		if (Input.GetButton("Rotation left and right"))
 		{
-			tiltAroundY += Input.GetAxis("Rotation left and right") * options.rotation_speed*Time.deltaTime;
+			tiltAroundY -= Input.GetAxis("Rotation left and right") * options.rotation_speed*Time.deltaTime;
 		}
 		if (Input.GetButton("Rotation up and down"))
 		{
@@ -71,7 +73,7 @@ public class Camera_Controller : MonoBehaviour {
 
 	Vector3 getK()
 	{
-		return objects.canvas.transform.position - objects.mainCamera.transform.position;
+		return Obj.canvas.transform.position - Obj.mainCamera.transform.position;
 	}
 
 	void zoom()
@@ -79,10 +81,33 @@ public class Camera_Controller : MonoBehaviour {
 		if (Input.GetButton ("Zoom")) 
 		{
 			float f = Input.GetAxis ("Zoom") * options.zoom_speed * Time.deltaTime;
-			objects.canvas.transform.localPosition = new Vector3 (objects.canvas.transform.localPosition.x,
-				objects.canvas.transform.localPosition.y,
-				objects.canvas.transform.localPosition.z + f);
+			Obj.canvas.transform.localPosition = new Vector3 (Obj.canvas.transform.localPosition.x,
+				Obj.canvas.transform.localPosition.y,
+				Obj.canvas.transform.localPosition.z + f);
 		}
+	}
+	Vector3 start_position,last_click,first_click;
+	void move()
+	{
+		if (Input.GetMouseButtonDown (0)) 
+		{
+			start_position = transform.position;
+			first_click = getMousePosition ();
+			return;
+		}
+		if (Input.GetMouseButton (0)) 
+		{
+			last_click = getMousePosition ();
+			transform.position += (first_click-last_click);
+		}
+	}
+	void true_zoom()
+	{
+		float a=-Input.GetAxis ("Mouse ScrollWheel");
+		Obj.mainCamera.orthographicSize += a * options.true_zoom_speed ;
+		Obj.camera_2.orthographicSize += a * options.true_zoom_speed;
+		if (Obj.mainCamera.orthographicSize < options.min_true_zoom)
+			Obj.camera_2.orthographicSize=Obj.mainCamera.orthographicSize = options.min_true_zoom;
 	}
 
 
@@ -96,6 +121,7 @@ public class Camera_Controller : MonoBehaviour {
     public struct OBJECTS
     {
         public Camera mainCamera;
+		public Camera camera_2;
 		public GameObject canvas;
 		public RectTransform rt_canvas;
 	}
@@ -104,6 +130,8 @@ public class Camera_Controller : MonoBehaviour {
     {
 		public float rotation_speed;
 		public float zoom_speed;
+		public float true_zoom_speed;
+		public float min_true_zoom;
 		public int n;
 		public int m;
 		public Vector2 min;

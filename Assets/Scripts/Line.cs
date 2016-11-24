@@ -214,6 +214,12 @@ public class Line : MonoBehaviour {
 		//
 		return point+vec*sin/vec.magnitude*options.magnitude;
 	}
+
+	public List<Vector3> getFunctionPoint()
+	{
+		return function;
+	}
+
 	void toBegin()
 	{
 		isDestroyTime=false;
@@ -244,7 +250,7 @@ public class Line : MonoBehaviour {
 			Vector3 start, end;
 			start = _list [_list.Count - 2];
 			end = _list [_list.Count - 1];
-			start = Vector3.Lerp (start, end, 0.5f);
+			start = Vector3.Lerp (end, start, options.lenght_of_arrow);
 
 			List<Vector3> vec = new List<Vector3> ();
 			vec.Add (start);
@@ -311,6 +317,7 @@ public class Line : MonoBehaviour {
 		public float speed;
 		public float magnitude;
 		public float magnitude_speed;
+		public float lenght_of_arrow;
 		public int const_length;
 		public bool magicSin;
 		public bool isTimeForSin;
