@@ -58,15 +58,23 @@ public class Controller : MonoBehaviour {
 		vectors_line = new List<Line> ();
 		vec_of_lines = new List<Vector3> ();
 		vec_of_Lines = new List<Line> ();
-		vectors_line_1 = new List<Line> ();
+        vectors_line_1 = new List<Line> ();
+        addMöbius_strip(20);
+        /*/
         //addSquare(new Vector3(-30, -30), new Vector3(-30, 30), new Vector3(30, 30), new Vector3(30, -30));
-        //addEllipse(new Vector3(),30,20);
+        addEllipse(new Vector3(),10,10);
+        vec_points = new List<Vector3>();
+        for (float i = 10; i >= 10; i -= 0.5f)
+        {
+            Move(vec_points,getEllipse(new Vector3(0,0,-2), i, i));
+        }
+        //vec_points = getEllipse(new Vector3(), i, i);
+        StartSearchVector_of_speed(vec_of_lines, vec_points);
         //addTriangle(new Vector3(-30, -30), new Vector3(-30, 30), new Vector3(30, 30));
         //addSquare(new Vector3(-30, -30,-10), new Vector3(-30, 30,-15), new Vector3(30, 30, 5), new Vector3(30, -30, 20));
-        //addMöbius_strip(20);
         //StrangeSquare
        
-		/*/
+		//
 		//addLines (options.list);
 		options.list = new List<Vector3> ();
 		for (float x = -5; x <= 5; x += 0.1f) 
@@ -114,6 +122,14 @@ public class Controller : MonoBehaviour {
         addLines(list);
     }
 
+    void Move(List<Vector3> a,List<Vector3> b)
+    {
+        for (int i = 0; i < b.Count; i++)
+        {
+            a.Add(b[i]);
+        }
+    }
+
     void addSquare(Vector3 a,Vector3 b,Vector3 c, Vector3 d)
     {
         List<Vector3> list=new List<Vector3>();
@@ -125,14 +141,35 @@ public class Controller : MonoBehaviour {
         addLines(list);
     }
 
+    List<Vector3> getSquare(Vector3 a,Vector3 b,Vector3 c, Vector3 d)
+    {
+        List<Vector3> list=new List<Vector3>();
+        list.Add(a);
+        list.Add(b);
+        list.Add(c);
+        list.Add(d);
+        //list.Add(a);
+        return list;
+    }
+
     void addTriangle(Vector3 a,Vector3 b,Vector3 c)
     {
         List<Vector3> list=new List<Vector3>();
         list.Add(a);
         list.Add(b);
         list.Add(c);
-        list.Add(a);
+        //list.Add(a);
         addLines(list);
+    }
+
+    List<Vector3> getTriangle(Vector3 a,Vector3 b,Vector3 c)
+    {
+        List<Vector3> list=new List<Vector3>();
+        list.Add(a);
+        list.Add(b);
+        list.Add(c);
+        list.Add(a);
+        return list;
     }
 
     void addEllipse(Vector3 pos, float a, float b)
@@ -149,6 +186,20 @@ public class Controller : MonoBehaviour {
         addLines(list);
     }
 
+    List<Vector3> getEllipse(Vector3 pos, float a, float b)
+    {
+        List<Vector3> list = new List<Vector3>();
+        Vector3 vec;
+        for(float x=0;x<2*Mathf.PI;x+=0.1f)
+        {
+            vec = new Vector3(a * Mathf.Cos(x) + pos.x, b * Mathf.Sin(x) + pos.y, pos.z);
+            list.Add(vec);
+        }
+        vec = new Vector3(a * Mathf.Cos(2*Mathf.PI) + pos.x, b * Mathf.Sin(2*Mathf.PI) + pos.y, pos.z);
+        //list.Add(vec);
+        return list;
+    }
+
 	
 	// Update is called once per frame
 	bool wait=false;
@@ -158,6 +209,7 @@ public class Controller : MonoBehaviour {
 	int sup_Index_of_Vectors_list_2=0;
 	int sup_Index_of_Vectors_list_3=0;
 	int sup_Index_of_Lines=0;
+    Vector3 current_normal;
 	void Update () 
 	{
 		/*/
@@ -176,6 +228,10 @@ public class Controller : MonoBehaviour {
 			}
 		}
 		/*/
+        if (Input.GetButtonUp("Projection"))
+        {
+            options.isProjectionTime = !options.isProjectionTime;
+        }
 		if (Input.GetButtonUp ("Clear vector field")) 
 		{
 			Clear_Vectors_list ();
@@ -224,6 +280,7 @@ public class Controller : MonoBehaviour {
 		else if(Input.GetButtonUp("Create vector field"))
 		{
 			vec_points = Obj.Cam_cont.getVector_of_point ();
+            current_normal = Obj.Cam_cont.normal();
 			//new List<Vector3> ();
 			//vec_points.Add (Obj.Cam_cont.getMousePosition ());
 			if (options.isTime_for_Light_Render_Grafick) 
@@ -238,6 +295,12 @@ public class Controller : MonoBehaviour {
 			print ("Start");
 		}
 	}
+
+    void StartSearchVector_of_speed(List<Vector3> lines,List<Vector3> points)
+    {
+        Obj.algo.FindVector_of_speed(lines, points);
+        wait = true;
+    }
 
 	void Clear_Vectors_list()
 	{
@@ -352,6 +415,10 @@ public class Controller : MonoBehaviour {
 			} 
 			else 
 			{
+                for (int i = 0; i < list.Count; i++)
+                {
+                    vec_of_lines.Add(list[i]);
+                }
                 vec_of_Lines[sup_Index_of_Lines].gameObject.SetActive(true);
 				vec_of_Lines[sup_Index_of_Lines].addFunctionPoints(list);
 				sup_Index_of_Lines++;
@@ -442,6 +509,8 @@ public class Controller : MonoBehaviour {
 		//
 		for (int i = 0; i < points.Count; i++) 
 		{
+            if(options.isProjectionTime)
+                list_of_speed[i] = Vector3.ProjectOnPlane(list_of_speed[i], current_normal);
 			addVector (points [i], points [i] + list_of_speed [i]);
 		}
 		/*/
@@ -460,6 +529,7 @@ public class Controller : MonoBehaviour {
 			vec_of_Lines [i].Clear ();
 			vec_of_Lines[i].gameObject.SetActive(false);
 		}
+        vec_of_lines.Clear();
 		sup_Index_of_Lines = 0;
 	}
 
@@ -519,5 +589,6 @@ public class Controller : MonoBehaviour {
 		public List<Vector3> list;
 		public int isTime_for_Light_Render_Vector;
 		public bool isTime_for_Light_Render_Grafick;
+        public bool isProjectionTime;
 	}
 }

@@ -87,6 +87,15 @@ public class Camera_Controller : MonoBehaviour {
 		}
 	}
 	Vector3 start_position,last_click,first_click;
+    public Vector3 getProjection(Vector3 V)
+    {
+        return Obj.mainCamera.ScreenToWorldPoint(Obj.mainCamera.WorldToScreenPoint(V)) - Obj.mainCamera.ScreenToWorldPoint(Obj.mainCamera.WorldToScreenPoint(new Vector3()));
+    }
+
+    public Vector3 normal()
+    {
+        return Obj.mainCamera.transform.forward;
+    }
 	void move()
 	{
 		if (Input.GetMouseButtonDown (0)) 

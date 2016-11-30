@@ -55,7 +55,7 @@ public class Algorightm : MonoBehaviour {
 	{
 		Vector3 res = new Vector3 ();
 		res.x = a.y * b.z - a.z * b.y;
-		res.y = a.x * b.z - a.z * b.x;
+        res.y = -(a.x * b.z - a.z * b.x);
 		res.z = a.x * b.y - a.y * b.x;
 		res.Normalize();
 		return res;
