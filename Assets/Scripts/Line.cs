@@ -12,11 +12,12 @@ public class Line : MonoBehaviour {
 	public static bool isTimeForSin=false;
 	public State_of_Line state=State_of_Line.Without_Restrictions;
 	/*/
-	//private Vector3[]
+	//protected Vector3[]
 	public Options options;
-	private List<Vector3> list;
-	private List<Vector3> function;
-	private LineRenderer line_renderer;
+	protected List<Vector3> list;
+	protected List<Vector3> function;
+	protected LineRenderer line_renderer;
+
 	int Index;
 	int lastIndex;
 	int min_Index=0;
@@ -51,7 +52,9 @@ public class Line : MonoBehaviour {
 		return;
 		line_renderer.SetVertexCount (list.Count);
 		line_renderer.SetPosition (list.Count - 1, vec);
-	}
+    }
+
+
 	void Update() 
 	{
 		if(true||!options.magicSin)
@@ -258,6 +261,11 @@ public class Line : MonoBehaviour {
 			options.arrow.addFunctionPoints (vec);
 		}
 	}
+
+    public void SetColors(Color begin,Color end)
+    {
+        line_renderer.SetColors(begin, end);
+    }
 	public void Clear()
 	{
 		function = new List<Vector3> ();
@@ -268,10 +276,6 @@ public class Line : MonoBehaviour {
 		toBegin ();
 	}
 
-	public void setColor(Color begin,Color end)
-	{
-		line_renderer.SetColors (begin, end);
-	}
 	public void FleshTime()
 	{
 		isFleshTime = true;

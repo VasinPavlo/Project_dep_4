@@ -23,6 +23,11 @@ public class Camera_Controller : MonoBehaviour {
 		zoom ();
 		move ();
 		true_zoom ();
+
+        if (Input.GetButtonUp("Panel_in_scene"))
+        {
+            inScene();
+        }
 	}
 
 	public Vector3 getMousePosition()
@@ -41,6 +46,7 @@ public class Camera_Controller : MonoBehaviour {
 		float w = Obj.rt_canvas.offsetMax.x-Obj.rt_canvas.offsetMin.x;
 		float steph = h/(options.m-1);
 		float stepw = w / (options.n - 1);
+        steph = stepw;
 		Vector3 vec;
 		for (float x = Obj.rt_canvas.offsetMin.x; x <= Obj.rt_canvas.offsetMax.x; x+=stepw) {
 			for (float y = Obj.rt_canvas.offsetMin.y; y <= Obj.rt_canvas.offsetMax.y; y+=steph) {
@@ -52,6 +58,11 @@ public class Camera_Controller : MonoBehaviour {
 		//print (list.Count);
 		return list;
 	}
+
+    public void inScene()
+    {
+        Obj.animator.SetBool("inScene", !Obj.animator.GetBool("inScene"));
+    }
 
 	void rotation()
 	{
@@ -133,6 +144,7 @@ public class Camera_Controller : MonoBehaviour {
 		public Camera camera_2;
 		public GameObject canvas;
 		public RectTransform rt_canvas;
+        public Animator animator;
 	}
     [System.Serializable]
     public struct OPTIONS

@@ -57,6 +57,7 @@ public class Algorightm : MonoBehaviour {
 		res.x = a.y * b.z - a.z * b.y;
         res.y = -(a.x * b.z - a.z * b.x);
 		res.z = a.x * b.y - a.y * b.x;
+        //print("lenght of normal:" + res.magnitude);
 		res.Normalize();
 		return res;
 	}
@@ -361,7 +362,8 @@ public class MyThread:MonoBehaviour
 		float cos_b = (l_AB * l_AB + l_BM * l_BM - l_AM * l_AM) / (2 * l_AB * l_BM);
 		float _h=Mathf.Abs(l_AM*Mathf.Sqrt(1- cos_a*cos_a));
 		//print (_h);
-		_h=(_h<_algo.options.deltaR?_h/_algo.options.deltaR2:1/_h);
+        _h=(_h<_algo.options.deltaR?_h/_algo.options.deltaR2:1/_h);
+        //print(_h / 2 * (cos_a + cos_b));
 		//print (_h);
 		float v=Gamma*_h/(4*Mathf.PI)*(cos_a+cos_b);
 		V = Algorightm.getMagicVec(AM,AB)*v;
