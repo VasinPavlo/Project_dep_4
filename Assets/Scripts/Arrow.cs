@@ -28,14 +28,30 @@ public class Arrow : Line
         return vec;
     }
 
-    public void setColorV(float V,Color start,Color end,float maxV)
+    float _V;
+
+    public void RefreshColor(Color start,Color end,float minV,float maxV)
+    {
+        float V = _V;Vector4 _start = toVector(start);
+        Vector4 _end = toVector(end);
+        Vector4 vec = _end - _start;
+        V = (V <= minV ? minV : V);
+        V = (V >= maxV ? maxV : V);
+        vec = _start+vec * V / (maxV-minV);
+        //print(vec);
+        setColor(vec.x, vec.y, vec.z, vec.w);
+    }
+
+    public void setColorV(float V,Color start,Color end,float minV,float maxV)
     {
         //print("Hello");
+        _V=V;
         Vector4 _start = toVector(start);
         Vector4 _end = toVector(end);
         Vector4 vec = _end - _start;
-        V=(V>=maxV?maxV:V);
-        vec = _start+vec * V / maxV;
+        V = (V <= minV ? minV : V);
+        V = (V >= maxV ? maxV : V);
+        vec = _start+vec * V / (maxV-minV);
         //print(vec);
         setColor(vec.x, vec.y, vec.z, vec.w);
     }

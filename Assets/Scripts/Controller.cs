@@ -61,35 +61,11 @@ public class Controller : MonoBehaviour {
         vectors_line_3 = new List<Arrow> ();
         //vectors_of_arrow = new List<Arrow>();
         addEllipse(new Vector3(),10,10);
-        //addMöbius_strip(20);
-        //AddTore(new Vector3(),20,15,2*Mathf.PI/360/30,2*Mathf.PI/360);
-        /*/
-        //addSquare(new Vector3(-30, -30), new Vector3(-30, 30), new Vector3(30, 30), new Vector3(30, -30));
-        vec_points = new List<Vector3>();
-        for (float i = 10; i >= 10; i -= 0.5f)
-        {
-            Move(vec_points,getEllipse(new Vector3(0,0,-2), i, i));
-        }
-        //vec_points = getEllipse(new Vector3(), i, i);
-        StartSearchVector_of_speed(vec_of_lines, vec_points);
-        //addTriangle(new Vector3(-30, -30), new Vector3(-30, 30), new Vector3(30, 30));
-        //addSquare(new Vector3(-30, -30,-10), new Vector3(-30, 30,-15), new Vector3(30, 30, 5), new Vector3(30, -30, 20));
-        //StrangeSquare
-       
-		//
-		//addLines (options.list);
-		options.list = new List<Vector3> ();
-		for (float x = -5; x <= 5; x += 0.1f) 
-		{
-            options.list.Add (new Vector3 (x,x*x, 0));
-			//print (x + " " + x * x);
-		}
-		addLines (options.list);
-		options.list.Clear();
-		addLines (options.list);
-		options.list.Clear();
-		/*/
-		//test = new Test ();
+
+        //Obj.grad_table.create_table(options.number_of_grad, options.minColor, options.maxColor);
+        //Obj.speed_table.create_table(options.number_of_grad, options.minV, options.maxV);
+
+        Obj.online_options.create_table(options.number_of_grad, options.minColor, options.maxColor, options.minV, options.maxV);
 	}
 
 	void OnApplicationQuit()//берш
@@ -461,6 +437,17 @@ public class Controller : MonoBehaviour {
 		//addPoint (list [list.Count - 1]);
 	}
 
+    public void Refresh_Color_of_Vectors()
+    {
+        if(options.isTime_for_Light_Render_Vector!=4)
+            return;
+
+        for (int i = 0; i < vectors_line_3.Count; i++)
+        {
+            vectors_line_3[i].RefreshColor(options.minColor, options.maxColor, options.minV, options.maxV);
+        }
+    }
+
 	public Edge addLine(Vector3 start,Vector3 end)
 	{
 		Edge line = (Object.Instantiate (clones.edge, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Edge>();
@@ -536,6 +523,7 @@ public class Controller : MonoBehaviour {
 			sup_Index_of_Vectors_list_3++;
 			break;
         case 4:
+                
             float V = (end - start).magnitude;
             end = start + (end - start).normalized*options.standart_size_of_vector;
             //print(V);
@@ -548,7 +536,7 @@ public class Controller : MonoBehaviour {
                 list.Add (end);
                 vector.addFunctionPoints (list);
                 vector.transform.SetParent (parents.Vectors.transform);
-                vector.setColorV(V, options.minColor, options.maxColor, options.maxV);
+                vector.setColorV(V, options.minColor, options.maxColor,options.minV, options.maxV);
                 //return vector;
             } 
             else
@@ -559,7 +547,7 @@ public class Controller : MonoBehaviour {
                 list.Add (end);
                 vectors_line_3[sup_Index_of_Vectors_list_3].gameObject.SetActive (true);
                 vectors_line_3[sup_Index_of_Vectors_list_3].addFunctionPoints (list);
-                vectors_line_3[sup_Index_of_Vectors_list_3].setColorV(V, options.minColor, options.maxColor, options.maxV);
+                    vectors_line_3[sup_Index_of_Vectors_list_3].setColorV(V, options.minColor, options.maxColor,options.minV, options.maxV);
                 //return vectors [sup_Index_of_Vectors_list++];
             }
             sup_Index_of_Vectors_list_3++;
@@ -629,6 +617,9 @@ public class Controller : MonoBehaviour {
 		public Camera_Controller Cam_cont;
 		public Algorightm algo;
         public File_Controller file_cont;
+        public Online_Options online_options;
+        //public table_of_grad grad_table;
+        //public table_of_speed speed_table;
 	}
 	[System.Serializable]
 	public struct CLONE_OF_OBJECTS
@@ -656,7 +647,10 @@ public class Controller : MonoBehaviour {
         public bool isProjectionTime;
         public Color minColor;
         public Color maxColor;
+        public float minV;
         public float maxV;
         public float standart_size_of_vector;
+
+        public int number_of_grad;
 	}
 }
