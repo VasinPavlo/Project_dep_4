@@ -13,6 +13,7 @@ public class File_Controller : MonoBehaviour {
 	public float deltaRefresh=10f;
 	public Animator anim;
 	public Controller contr;
+    public string directory_name="Assets//docs//Lines";
 
 	private float size_of_Panel;
 	private VerticalLayoutGroup verticalLG;
@@ -22,10 +23,20 @@ public class File_Controller : MonoBehaviour {
 	private float current_time;
 	private bool refresh_time=true;
 	private bool isFirst=true;
+
+    public File_Controller()
+    {
+    }
+
+    public File_Controller(string name)
+    {
+        directory_name = name;
+    }
+
 	void Awake()
 	{
 		verticalLG = GetComponent<VerticalLayoutGroup> ();
-		directory = new DirectoryInfo ("Assets//docs//Lines");
+        directory = new DirectoryInfo (directory_name);
 		list_of_file = new List<File_Input> ();
 		StartCoroutine ("_RefreshFile");
 		//RefreshFile();
@@ -144,7 +155,7 @@ public class File_Controller : MonoBehaviour {
 	}
 	void Save(File_Input file_input)
 	{
-		file_input.Write (contr.getList_of_Lines());
+		file_input.Write (contr.getList_of_lines());
 
 	}
 	public void saveCurrent()

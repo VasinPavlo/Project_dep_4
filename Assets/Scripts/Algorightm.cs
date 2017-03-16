@@ -48,7 +48,6 @@ public class Algorightm : MonoBehaviour {
 	bool isTime_exit=false;
 	// Update is called once per frame
 	void Update () {
-		options.deltaR2 = options.deltaR * options.deltaR;
 	}
 
 	public static Vector3 getMagicVec(Vector3 a,Vector3 b)
@@ -103,6 +102,9 @@ public class Algorightm : MonoBehaviour {
 		isTime_Start=true;
 		isWork=true;
 	}
+
+
+
 
 	[System.NonSerialized]
 	public int count_of_thread;
@@ -263,7 +265,7 @@ public class Algorightm : MonoBehaviour {
 	void setNumber_in_main_canvas(int a,int p,string text)
 	{
 		//print (a.ToString () + "/" + p.ToString () + text);
-		Obj.main_canvas.setText (a.ToString () + "/" + p.ToString ()+text);
+		//Obj.main_canvas.setText (a.ToString () + "/" + p.ToString ()+text);
 	}
 
 	void Clear_text_in_main_canvas()
@@ -276,7 +278,6 @@ public class Algorightm : MonoBehaviour {
 	{
 		public float TestGamma;
 		public float deltaR;
-		public float deltaR2;
 		public bool isThreding;
 		public bool isVector3Line;
 	}
@@ -358,15 +359,32 @@ public class MyThread:MonoBehaviour
 		float l_AB = Vector3.Distance (A, B);
 		float l_AM = Vector3.Distance (A, M);
 		float l_BM = Vector3.Distance (M, B);
-		float cos_a = (l_AB * l_AB + l_AM * l_AM - l_BM * l_BM) / (2 * l_AB * l_AM);
-		float cos_b = (l_AB * l_AB + l_BM * l_BM - l_AM * l_AM) / (2 * l_AB * l_BM);
+        float cos_a, cos_b;
+        if (l_AB * l_AM * l_BM != 0)
+        {
+            cos_a = (l_AB * l_AB + l_AM * l_AM - l_BM * l_BM) / (2 * l_AB * l_AM);
+            cos_b = (l_AB * l_AB + l_BM * l_BM - l_AM * l_AM) / (2 * l_AB * l_BM);
+        }
+        else
+        {
+            cos_a = 1;
+            cos_b = 1;
+        }
 		float _h=Mathf.Abs(l_AM*Mathf.Sqrt(1- cos_a*cos_a));
 		//print (_h);
-        _h=(_h<_algo.options.deltaR?_h/_algo.options.deltaR2:1/_h);
-        //print(_h / 2 * (cos_a + cos_b));
-		//print (_h);
-		float v=Gamma*_h/(4*Mathf.PI)*(cos_a+cos_b);
-		V = Algorightm.getMagicVec(AM,AB)*v;
+        _h=(_h<_algo.options.deltaR?epsilon(_h,_algo.options.deltaR):1/_h);
+        if (float.IsNaN(_h))
+            _h = 0;
+        if (_h == 0)
+        {
+            V = new Vector3();
+        }
+        else
+        {
+            float v=Gamma*_h/(4*Mathf.PI)*(cos_a+cos_b);
+            V = Algorightm.getMagicVec(AM,AB)*v;
+        }
+        //print("Algo:"+V);
 		//yield return new WaitForSeconds (0);
 		End ();
 		//print ("End:" + Thread.GetDomainID ());
@@ -378,5 +396,12 @@ public class MyThread:MonoBehaviour
 		_algo.plus(-1);
 		//print ("Hel" + thread.ManagedThreadId);
 	}
+
+    float epsilon(float _h,float delta)
+    {
+        //options.deltaR2 = options.deltaR * options.deltaR;
+        float _delta=delta*delta*delta;
+        return _h * _h / _delta;
+    }
 
 }

@@ -10,12 +10,17 @@ public class File_Input : MonoBehaviour {
 	private File_Controller Fcon;
 	private Animator anim;
 	private Text text;
-	private FileInfo file;
+    private FileInfo file;
+    private static DirectoryInfo directory= new DirectoryInfo ("Assets//docs//move");
 	void Awake()
 	{
 		Fcon = GameObject.FindGameObjectWithTag ("File_Controller").GetComponent<File_Controller>();
 		anim = GetComponent<Animator> ();
 		text = GetComponent<Text> ();
+        if (!directory.Exists)
+        {
+            directory.Create();
+        }
 	}
 	public void setToCurrentFile(bool b)
 	{
@@ -37,6 +42,23 @@ public class File_Input : MonoBehaviour {
 			text.text=name;
 		}
 	}
+
+    public void setFile(string _name)
+    {
+        string name=_name.Replace(".txt"," ");
+        if (name != "")
+        {
+            FileInfo[] files = directory.GetFiles(name+".txt");
+            if (files.Length == 0)
+            {
+                file = new FileInfo(directory.FullName + "\\" + name + ".txt");
+            }
+            else
+                file = directory.GetFiles(_name)[0];
+            //print(name);
+            text.text=name;
+        }
+    }
 	public bool setName(string name,DirectoryInfo direc)
 	{
 		name=name.Replace (" ", "_");
@@ -45,7 +67,8 @@ public class File_Input : MonoBehaviour {
 			file = new FileInfo (direc.FullName + "\\" + name + ".txt");
 			if (!file.Exists) 
 			{
-				text.text = name;
+                if(text!=null)
+				    text.text = name;
 				return true;
 			} 
 			return false;
@@ -107,7 +130,10 @@ public class File_Input : MonoBehaviour {
 		List<Vector3> list=null;
 		Vector3 vec;
 		float x = 0, y = 0, z = 0;
-		for(int i=0;i<text.Length;i++)
+        if (text.Length == 0)
+            return list_of_list;
+        int i = 0;
+		for(;i<text.Length;i++)
 		{
 			line=text[i];
 			if (line == "end of line") 

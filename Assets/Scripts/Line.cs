@@ -153,6 +153,7 @@ public class Line : MonoBehaviour {
 	void LateUpdate()
 	{
 		//Clear ();
+        return;
 		if (Index_of_Wave > list.Count - 1)
 			Index_of_Wave = list.Count - 1;
 		if (Index_of_Wave < 1)
@@ -246,7 +247,12 @@ public class Line : MonoBehaviour {
 			return;
 		function = _list;
 		//print (function.Count + " count");
-		toBegin ();
+		//toBegin ();
+        line_renderer.SetVertexCount(function.Count);
+        for (int i = 0; i < function.Count; i++)
+        {
+            line_renderer.SetPosition(i, function[i]);
+        }
 		list.Add (_list [0]);
 		if (options.arrow != null&&_list.Count>=2) 
 		{

@@ -61,11 +61,22 @@ public class Controller : MonoBehaviour {
         vectors_line_3 = new List<Arrow> ();
         //vectors_of_arrow = new List<Arrow>();
         addEllipse(new Vector3(),10,10);
+        addEllipse(new Vector3(0,0,5),4,4);
+
+        //Obj.move_controller.StartCreateMoves("ellipseE02");
+        //Obj.move_controller.StartCreateMoves("ellipseE03");
+        Obj.move_controller.StartPlayMove("ellipseE03");
+        //Clear_list_of_lines();
+
+        //AddTore(new Vector3(),10,8,4*100,4);
+        //Obj.move_controller.StartCreateMoves("Tore1");
+
+        //Obj.move_controller.StartPlayMove("Tore1");
 
         //Obj.grad_table.create_table(options.number_of_grad, options.minColor, options.maxColor);
         //Obj.speed_table.create_table(options.number_of_grad, options.minV, options.maxV);
 
-        Obj.online_options.create_table(options.number_of_grad, options.minColor, options.maxColor, options.minV, options.maxV);
+        //Obj.online_options.create_table(options.number_of_grad, options.minColor, options.maxColor, options.minV, options.maxV);
 	}
 
 	void OnApplicationQuit()//берш
@@ -134,6 +145,12 @@ public class Controller : MonoBehaviour {
         List<Vector3> list = getTore(pos, R, r, stepR, stepr);
         addLines(list);
     }
+
+    void AddTore(Vector3 pos,float R,float r,int n,int N)
+    {
+        AddTore(pos, R, r, 2*Mathf.PI / n, 2*Mathf.PI * N / n);
+    }
+
     void addEllipse(Vector3 pos,float a,float b)
     {
         addLines(getEllipse(pos, a, b));
@@ -170,7 +187,7 @@ public class Controller : MonoBehaviour {
             list.Add(vec);
         }
         vec = new Vector3(a * Mathf.Cos(2*Mathf.PI) + pos.x, b * Mathf.Sin(2*Mathf.PI) + pos.y, pos.z);
-        //list.Add(vec);
+        list.Add(vec);
         return list;
     }
 
@@ -178,11 +195,13 @@ public class Controller : MonoBehaviour {
     {
         Vector3 point;
         List<Vector3> list=new List<Vector3>();
-        for(float gamma=0, alpha=0;gamma<=2*Mathf.PI;gamma+=stepR,alpha+=stepr)
+        for(float gamma=0, alpha=0;gamma<2*Mathf.PI;gamma+=stepR,alpha+=stepr)
         {
             point = new Vector3((R + r * Mathf.Cos(alpha)) * Mathf.Cos(gamma), (R + r * Mathf.Cos(alpha)) * Mathf.Sin(gamma), r * Mathf.Sin(alpha));
             list.Add(point);
         }
+        point=new Vector3((R + r * Mathf.Cos(0)) * Mathf.Cos(0), (R + r * Mathf.Cos(0)) * Mathf.Sin(0), r * Mathf.Sin(0));
+        list.Add(point);
         return list;
     }
 
@@ -292,10 +311,27 @@ public class Controller : MonoBehaviour {
 		}
 	}
 
+    void Move_and_Moves()
+    {
+        if (Obj.move_controller.isCreate || Obj.move_controller.isPlay)
+        {
+            Obj.algo.Obj.main_canvas.setText("Time:" + Obj.move_controller.current_time);
+        }
+        else
+        {
+            Obj.algo.Obj.main_canvas.setText("");
+        }
+    }
+
     void StartSearchVector_of_speed(List<Vector3> lines,List<Vector3> points)
     {
         Obj.algo.FindVector_of_speed(lines, points);
         wait = true;
+    }
+
+    public List<Line> getVector_of_Line()
+    {
+        return vec_of_Lines;
     }
 
 	void Clear_Vectors_list()
@@ -585,17 +621,25 @@ public class Controller : MonoBehaviour {
 		sup_Index_of_Lines = 0;
 	}
 
-	public List<Vector3> getList_of_lines()
+    public List<Line> getList_of_Lines()
 	{
-		return vec_of_lines;
+        return vec_of_Lines;
 	}
 
-	public List<List<Vector3> > getList_of_Lines()
+	public List<List<Vector3> > getList_of_lines()
 	{
-		List<List<Vector3> > list = new List<List<Vector3>> ();
+        List<List<Vector3> > list = new List<List<Vector3>> ();
+        List<Vector3> list_2;
+        List<Vector3> function_point;
 		for (int i = 0; i < vec_of_Lines.Count; i++) 
 		{
-			list.Add (vec_of_Lines [i].getFunctionPoint ());
+            function_point = vec_of_Lines[i].getFunctionPoint();
+            list_2 = new List<Vector3>();
+            for (int j = 0; j < function_point.Count; j++)
+            {
+                list_2.Add(function_point[j]);
+            }
+            list.Add (list_2);
 		}
 		return list;
 	}
@@ -618,6 +662,7 @@ public class Controller : MonoBehaviour {
 		public Algorightm algo;
         public File_Controller file_cont;
         public Online_Options online_options;
+        public Move_Controller move_controller;
         //public table_of_grad grad_table;
         //public table_of_speed speed_table;
 	}
