@@ -120,10 +120,11 @@ public class File_Input : MonoBehaviour {
 		}
 	}
 
-
 	public List<List<Vector3> > Read()
 	{
 		string[] text = File.ReadAllLines (file.FullName);
+
+
 		string[] numbers;
 		String line;
 		List<List<Vector3>> list_of_list = new List<List<Vector3>> ();
@@ -169,6 +170,72 @@ public class File_Input : MonoBehaviour {
 
 		return list_of_list;
 	}
+
+    StreamReader stream;
+    public List<Vector3> ReadLine()
+    {
+        if(stream==null||stream.EndOfStream)
+            stream= file.OpenText();
+        List<Vector3> list = new List<Vector3>();
+        if (stream.EndOfStream)
+        {
+            //stream.Close();
+            _end_of_stream = true;
+            return list;
+        }
+        else
+        {
+            _end_of_stream = false;
+        }
+        
+        String line;
+
+        string[] numbers;
+        Vector3 vec;
+
+        float x = 0, y = 0, z = 0;
+        int i = 0;
+        while(!stream.EndOfStream)
+        {
+            line  = stream.ReadLine();
+            if (line == "end of line") 
+            {
+                break;
+            } 
+            numbers=line.Split(',');
+            if(numbers.Length<3)
+                continue;
+            /*/
+            for(int j=0;j<numbers.Length;j++)
+            {
+                print ("read:"+i+" "+j+"-"+numbers[j]);
+            }
+            /*/
+            float.TryParse( numbers[0],out x);
+            float.TryParse( numbers[1],out y);
+            float.TryParse( numbers[2],out z);
+            vec=new Vector3(x,y,z);
+            list.Add (vec);
+            //print ("read:"+vec.ToString());
+        }
+        if (stream.EndOfStream)
+        {
+            //stream.Close();
+            _end_of_stream = true;
+        }
+        return list;
+    }
+
+    bool _end_of_stream;
+
+    public bool EndOfStream
+    {
+        get
+        {
+            return _end_of_stream;
+        }
+    }
+
 	public string getName()
 	{
 		return text.text;

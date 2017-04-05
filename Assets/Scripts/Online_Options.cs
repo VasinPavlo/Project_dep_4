@@ -5,11 +5,12 @@ using System.Collections;
 public class Online_Options : MonoBehaviour {
     public Option options;
     public Obj obj;
+    public Animator anim;
 
     public void create_table(int n,Color s,Color e,float v1,float v2)
     {
-        obj.grad.create_table(n, s, e);
-        obj.speed.create_table(n, v1, v2);
+        obj.grad.create_table(n, s, e,v1,v2);
+        //obj.speed.create_table(n, v1, v2);
         options.minV = v1;
         options.maxV = v2;
         obj.minV.text = v1.ToString();

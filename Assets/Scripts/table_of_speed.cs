@@ -24,6 +24,7 @@ public class table_of_speed : MonoBehaviour {
     {
         if (list==null)
             list = new List<element_of_speed_table>();
+        des();
         float cellsizeY = glGroup.cellSize.y;
         int spacing_size = (int)(maxH / n - cellsizeY);
         glGroup.padding.top = spacing_size;

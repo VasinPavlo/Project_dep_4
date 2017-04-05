@@ -38,6 +38,7 @@ public class Controller : MonoBehaviour {
 	public CLONE_OF_OBJECTS clones;
 	public Parents parents;
 	public Options options;
+    public Param param;
 
 	List<GameObject> points;
 	List<Vector3> vec_points;
@@ -60,23 +61,60 @@ public class Controller : MonoBehaviour {
 		vec_of_Lines = new List<Line> ();
         vectors_line_3 = new List<Arrow> ();
         //vectors_of_arrow = new List<Arrow>();
-        addEllipse(new Vector3(),10,10);
-        addEllipse(new Vector3(0,0,5),4,4);
+        //addEllipse(new Vector3(),10,10);
+        //addEllipse(new Vector3(0,0,5),4,4);
+        Vector3 up=new Vector3(1,0);
+        Vector3 down = new Vector3(-1, 0);
+        Vector3 left = new Vector3(0, -1);
+        Vector3 right = new Vector3(0, 1);
+        /*/
+        List<Vector3> list = new List<Vector3>();
+        Vector3 current = new Vector3();
+        int N = 100;
+        float size = 10;
+        for (int i = 0; i < N; i++)
+        {
+            list.Add(current);
+            current = current + up/N*size;
+        }
+        for (int i = 0; i < N; i++)
+        {
+            list.Add(current);
+            current = current + right/N*size;
+        }
+        for (int i = 0; i < N; i++)
+        {
+            list.Add(current);
+            current = current + down/N*size;
+        }
+        for (int i = 0; i < N; i++)
+        {
+            list.Add(current);
+            current = current + left/N*size;
+        }
+        list.Add(new Vector3());
+        
 
-        //Obj.move_controller.StartCreateMoves("ellipseE02");
+        addLines(list);
+
+/*/
+
         //Obj.move_controller.StartCreateMoves("ellipseE03");
-        Obj.move_controller.StartPlayMove("ellipseE03");
+        //Obj.move_controller.StartCreateMoves("ellipseE04");
+        //Obj.move_controller.StartCreateMoves("squ");
+        //Obj.move_controller.StartPlayMove("ellipseE04");
         //Clear_list_of_lines();
 
-        //AddTore(new Vector3(),10,8,4*100,4);
+        //AddToreV(new Vector3(),10,6,60*40,60);
         //Obj.move_controller.StartCreateMoves("Tore1");
 
-        //Obj.move_controller.StartPlayMove("Tore1");
+        Obj.move_controller.StartPlayMove("Tore4");
 
         //Obj.grad_table.create_table(options.number_of_grad, options.minColor, options.maxColor);
         //Obj.speed_table.create_table(options.number_of_grad, options.minV, options.maxV);
 
-        //Obj.online_options.create_table(options.number_of_grad, options.minColor, options.maxColor, options.minV, options.maxV);
+        Obj.online_options.create_table(options.number_of_grad, options.minColor, options.maxColor, options.minV, options.maxV);
+        //Obj.file_cont.setActive();
 	}
 
 	void OnApplicationQuit()//берш
@@ -140,20 +178,32 @@ public class Controller : MonoBehaviour {
         addLines(list);
     }
 
-    void AddTore(Vector3 pos,float R,float r,float stepR,float stepr)
+    void AddToreV(Vector3 pos,float R,float r,float stepR,float stepr)
     {
-        List<Vector3> list = getTore(pos, R, r, stepR, stepr);
+        List<Vector3> list = getToreV(pos, R, r, stepR, stepr);
         addLines(list);
     }
 
-    void AddTore(Vector3 pos,float R,float r,int n,int N)
+    void AddToreV(Vector3 pos,float R,float r,int n,int N)
     {
-        AddTore(pos, R, r, 2*Mathf.PI / n, 2*Mathf.PI * N / n);
+        AddToreV(pos, R, r, 2*Mathf.PI / n, 2*Mathf.PI * N / n);
     }
 
     void addEllipse(Vector3 pos,float a,float b)
     {
         addLines(getEllipse(pos, a, b));
+    }
+
+
+    void AddToreH(Vector3 pos,float R,float r,float stepR,float stepr)
+    {
+        List<Vector3> list = getToreV(pos, R, r, stepR, stepr);
+        addLines(list);
+    }
+
+    void AddToreH(Vector3 pos,float R,float r,int n,int N)
+    {
+        AddToreV(pos, R, r,2*Mathf.PI * N / n , 2*Mathf.PI / n);
     }
 
     List<Vector3> getSquare(Vector3 a,Vector3 b,Vector3 c, Vector3 d)
@@ -181,7 +231,7 @@ public class Controller : MonoBehaviour {
     {
         List<Vector3> list = new List<Vector3>();
         Vector3 vec;
-        for(float x=0;x<2*Mathf.PI;x+=0.1f)
+        for(float x=0;x<2*Mathf.PI;x+=0.1f)//2*Mathf.PI/40)
         {
             vec = new Vector3(a * Mathf.Cos(x) + pos.x, b * Mathf.Sin(x) + pos.y, pos.z);
             list.Add(vec);
@@ -191,11 +241,11 @@ public class Controller : MonoBehaviour {
         return list;
     }
 
-    List<Vector3> getTore(Vector3 pos, float R,float r,float stepR,float stepr)
+    List<Vector3> getToreV(Vector3 pos, float R,float r,float stepR,float stepr)
     {
         Vector3 point;
         List<Vector3> list=new List<Vector3>();
-        for(float gamma=0, alpha=0;gamma<2*Mathf.PI;gamma+=stepR,alpha+=stepr)
+        for(float gamma=0, alpha=0;gamma<2*Mathf.PI||alpha<2*Mathf.PI;gamma+=stepR,alpha+=stepr)
         {
             point = new Vector3((R + r * Mathf.Cos(alpha)) * Mathf.Cos(gamma), (R + r * Mathf.Cos(alpha)) * Mathf.Sin(gamma), r * Mathf.Sin(alpha));
             list.Add(point);
@@ -282,6 +332,12 @@ public class Controller : MonoBehaviour {
                 options.isTime_for_Light_Render_Vector = 4;
             }
         }
+        if(Input.GetButtonUp("Line_5"))
+        {
+            print("Line_5");
+            Clear_Vectors_list();
+            options.isTime_for_Light_Render_Vector = 5;
+        }
 				
 		if (wait) 
 		{
@@ -365,11 +421,19 @@ public class Controller : MonoBehaviour {
                 for (int i = 0; i < vectors_line_3.Count; i++) 
             {
                 vectors_line_3 [i].Clear ();
+                    vectors_line_3[i].setColorV(0, options.minColor, options.maxColor, 0, current_maxV);
                 vectors_line_3 [i].gameObject.SetActive (false);
             }
             sup_Index_of_Vectors_list_3 = 0;
                 break;
-
+            case 5:
+                for (int i = 0; i < vectors_line_3.Count; i++)
+                {
+                    vectors_line_3[i].Clear();
+                    vectors_line_3[i].gameObject.SetActive(false);
+                }
+                sup_Index_of_Vectors_list_3 = 0;
+                break;
 		}
 	}
 
@@ -455,7 +519,7 @@ public class Controller : MonoBehaviour {
 					vec_of_lines.Add (list [i]);
 					_list.Add (list [i]);
 				}
-				line.addFunctionPoints (_list);
+				line.setFunctionPoints (_list);
 				line.transform.SetParent (parents.Lines.transform);
 				sup_Index_of_Lines++;
 			} 
@@ -466,7 +530,7 @@ public class Controller : MonoBehaviour {
                     vec_of_lines.Add(list[i]);
                 }
                 vec_of_Lines[sup_Index_of_Lines].gameObject.SetActive(true);
-				vec_of_Lines[sup_Index_of_Lines].addFunctionPoints(list);
+				vec_of_Lines[sup_Index_of_Lines].setFunctionPoints(list);
 				sup_Index_of_Lines++;
 			}
 		}
@@ -519,7 +583,7 @@ public class Controller : MonoBehaviour {
 				List<Vector3> list=new List<Vector3>();
 				list.Add (start);
 				list.Add (end);
-				vector.addFunctionPoints (list);
+				vector.setFunctionPoints (list);
 				vector.transform.SetParent (parents.Vectors.transform);
 				//return vector;
 			} 
@@ -529,7 +593,7 @@ public class Controller : MonoBehaviour {
 				list.Add (start);
 				list.Add (end);
 				vectors_line[sup_Index_of_Vectors_list_2].gameObject.SetActive (true);
-				vectors_line[sup_Index_of_Vectors_list_2].addFunctionPoints (list);
+				vectors_line[sup_Index_of_Vectors_list_2].setFunctionPoints (list);
 				//return vectors [sup_Index_of_Vectors_list++];
 			}
 			sup_Index_of_Vectors_list_2++;
@@ -543,7 +607,7 @@ public class Controller : MonoBehaviour {
 				List<Vector3> list=new List<Vector3>();
 				list.Add (start);
 				list.Add (end);
-				vector.addFunctionPoints (list);
+				vector.setFunctionPoints (list);
 				vector.transform.SetParent (parents.Vectors.transform);
 				//return vector;
 			} 
@@ -553,7 +617,7 @@ public class Controller : MonoBehaviour {
 				list.Add (start);
 				list.Add (end);
 				vectors_line_3[sup_Index_of_Vectors_list_3].gameObject.SetActive (true);
-				vectors_line_3[sup_Index_of_Vectors_list_3].addFunctionPoints (list);
+				vectors_line_3[sup_Index_of_Vectors_list_3].setFunctionPoints (list);
 				//return vectors [sup_Index_of_Vectors_list++];
 			}
 			sup_Index_of_Vectors_list_3++;
@@ -570,9 +634,9 @@ public class Controller : MonoBehaviour {
                 List<Vector3> list=new List<Vector3>();
                 list.Add (start);
                 list.Add (end);
-                vector.addFunctionPoints (list);
+                vector.setFunctionPoints (list);
                 vector.transform.SetParent (parents.Vectors.transform);
-                vector.setColorV(V, options.minColor, options.maxColor,options.minV, options.maxV);
+                    vector.setColorV(V, options.minColor, options.maxColor,current_minV, current_maxV);
                 //return vector;
             } 
             else
@@ -582,19 +646,81 @@ public class Controller : MonoBehaviour {
                 list.Add (start);
                 list.Add (end);
                 vectors_line_3[sup_Index_of_Vectors_list_3].gameObject.SetActive (true);
-                vectors_line_3[sup_Index_of_Vectors_list_3].addFunctionPoints (list);
-                    vectors_line_3[sup_Index_of_Vectors_list_3].setColorV(V, options.minColor, options.maxColor,options.minV, options.maxV);
+                vectors_line_3[sup_Index_of_Vectors_list_3].setFunctionPoints (list);
+                    vectors_line_3[sup_Index_of_Vectors_list_3].setColorV(V, options.minColor, options.maxColor,current_minV, current_maxV);
                 //return vectors [sup_Index_of_Vectors_list++];
             }
             sup_Index_of_Vectors_list_3++;
             break;
+            case 5:
+                end = end - start;
+                if (current_maxV != -1 && end.magnitude > current_maxV)
+                    end = end / end.magnitude * current_maxV;
+                if (current_minV != -1 && end.magnitude < current_minV)
+                    end = end / end.magnitude * current_minV;
+                end = end/end.magnitude*(end.magnitude-current_minV) / (current_maxV-current_minV) * param.size_of_web;
+                end = start + end;
+                if (sup_Index_of_Vectors_list_3 >= vectors_line_3.Count) 
+                {
+                    Arrow vector = (Object.Instantiate (clones.line_1, new Vector3 (), Quaternion.Euler (0, 0, 0)) as GameObject).GetComponent<Arrow> ();
+                    vectors_line_3.Add (vector);
+                    List<Vector3> list=new List<Vector3>();
+                    list.Add (start);
+                    list.Add (end);
+                    vector.setFunctionPoints (list);
+                    vector.transform.SetParent (parents.Vectors.transform);
+                    //return vector;
+                } 
+                else
+                {
+                    List<Vector3> list=new List<Vector3>();
+                    list.Add (start);
+                    list.Add (end);
+                    vectors_line_3[sup_Index_of_Vectors_list_3].gameObject.SetActive (true);
+                    vectors_line_3[sup_Index_of_Vectors_list_3].setFunctionPoints (list);
+                    //return vectors [sup_Index_of_Vectors_list++];
+                }
+                sup_Index_of_Vectors_list_3++;
+                break;
+                
 		}
 
 	}
 
+    float current_minV;
+    float current_maxV;
+
 	public void addVectors(List<Vector3> points,List<Vector3> list_of_speed)
 	{
 		//
+        if (points.Count == 0)
+            return;
+        if (options.isAutoV)
+        {
+            current_minV = current_maxV = list_of_speed[0].magnitude;
+
+            for (int i = 1; i < list_of_speed.Count; i++)
+            {
+                if (list_of_speed[i].magnitude < current_minV)
+                    current_minV = list_of_speed[i].magnitude;
+                if (list_of_speed[i].magnitude > current_maxV)
+                    current_maxV = list_of_speed[i].magnitude;
+            }
+            if (current_minV < options.minV)
+                current_minV = options.minV;
+            if (current_maxV > options.maxV)
+                current_maxV = options.maxV;
+        }
+        else
+        {
+            current_maxV = options.maxV;
+            current_minV = options.minV;
+        }
+
+        param.size_of_web = (points[0] - points[1]).magnitude;
+
+        Obj.online_options.create_table(options.number_of_grad, options.minColor, options.maxColor, current_minV, current_maxV);
+
 		for (int i = 0; i < points.Count; i++) 
 		{
             if(options.isTime_for_Light_Render_Vector==4&&current_normal!=null&options.isProjectionTime)
@@ -655,6 +781,11 @@ public class Controller : MonoBehaviour {
 		}
 	}
 
+    public void setSize_of_Web(float s)
+    {
+        param.size_of_web = s;
+    }
+
 	[System.Serializable]
 	public struct OBJECTS
 	{
@@ -694,8 +825,14 @@ public class Controller : MonoBehaviour {
         public Color maxColor;
         public float minV;
         public float maxV;
+        public bool isAutoV;
         public float standart_size_of_vector;
 
         public int number_of_grad;
 	}
+    [System.Serializable]
+    public struct Param
+    {
+        public float size_of_web;
+    }
 }

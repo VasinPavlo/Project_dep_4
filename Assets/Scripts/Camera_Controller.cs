@@ -13,6 +13,7 @@ public class Camera_Controller : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
+    float tiltAroundZ=0;
 	float tiltAroundY=0;
 	float tiltAroundX=0;
 	void Update ()
@@ -41,6 +42,7 @@ public class Camera_Controller : MonoBehaviour {
 
 	public List<Vector3> getVector_of_point()
 	{
+        return getVector_of_pointCamera();
 		List<Vector3> list=new List<Vector3>();
 		float h = Obj.rt_canvas.offsetMax.y-Obj.rt_canvas.offsetMin.y;
 		float w = Obj.rt_canvas.offsetMax.x-Obj.rt_canvas.offsetMin.x;
@@ -52,6 +54,7 @@ public class Camera_Controller : MonoBehaviour {
 			for (float y = Obj.rt_canvas.offsetMin.y; y <= Obj.rt_canvas.offsetMax.y; y+=steph) {
 				vec = new Vector3 (x, y, 0);
 				vec = Obj.canvas.transform.TransformPoint (vec);
+
 				list.Add (vec);
 			}
 		}
@@ -59,13 +62,42 @@ public class Camera_Controller : MonoBehaviour {
 		return list;
 	}
 
+    public List<Vector3> getVector_of_pointCamera()
+    {
+        List<Vector3> list = new List<Vector3>();
+        float h = Obj.mainCamera.pixelHeight;
+        float w = Obj.mainCamera.pixelWidth;
+        float steph = h / (options.m - 1);
+        float stepw = w / (options.n - 1);
+        steph = stepw;
+        Vector3 vector;
+        Vector3 fow = Obj.mainCamera.transform.forward*Mathf.Abs(Obj.mainCamera.transform.localPosition.z);
+        fow = fow / fow.magnitude;
+        for (float x = 0; x <= w; x+=stepw)
+        {
+            for (float y = 0; y <= h; y+=steph)
+            {
+                vector = new Vector3(x, y);
+                vector = Obj.mainCamera.ScreenToWorldPoint(vector);
+                print(vector);
+                list.Add(vector+fow);
+            }
+        }
+        print(list.Count);
+        return list;
+    }
+
     public void inScene()
     {
         Obj.animator.SetBool("inScene", !Obj.animator.GetBool("inScene"));
     }
 
+
+
 	void rotation()
 	{
+        _rotation();
+        return;
 		if (Input.GetButton("Rotation left and right"))
 		{
 			tiltAroundY -= Input.GetAxis("Rotation left and right") * options.rotation_speed*Time.deltaTime;
@@ -78,9 +110,46 @@ public class Camera_Controller : MonoBehaviour {
 			if (tiltAroundX <= -90)
 				tiltAroundX = -90;
 		}
-		Quaternion target = Quaternion.Euler(tiltAroundX, tiltAroundY, 0);
+
+        if (Input.GetButton("Rotation"))
+        {
+            tiltAroundZ -= Input.GetAxis("Rotation") * options.rotation_speed*Time.deltaTime;
+        }
+        Quaternion target = Quaternion.Euler(tiltAroundX, tiltAroundY, tiltAroundZ);
 		transform.rotation = Quaternion.Slerp(transform.rotation, target, 1);
 	}
+
+
+    void _rotation()
+    {
+        Vector3 vec = new Vector3();
+        if (Input.GetButton("Rotation left and right"))
+        {
+            //tiltAroundY -= Input.GetAxis("Rotation left and right") * options.rotation_speed*Time.deltaTime;
+            //vec = vec + transform.up*Input.GetAxis("Rotation left and right");
+            transform.RotateAround(transform.position, transform.up, options.rotation_speed * Time.deltaTime*Input.GetAxis("Rotation left and right"));
+        }
+        if (Input.GetButton("Rotation up and down"))
+        {
+            tiltAroundX+= Input.GetAxis("Rotation up and down") * options.rotation_speed*Time.deltaTime;
+            if (tiltAroundX >= 90)
+                tiltAroundX = 90;
+            if (tiltAroundX <= -90)
+                tiltAroundX = -90;
+            //vec = vec + transform.right*Input.GetAxis("Rotation up and down");
+            transform.RotateAround(transform.position, transform.right, options.rotation_speed * Time.deltaTime*Input.GetAxis("Rotation up and down"));
+        }
+
+        if (Input.GetButton("Rotation"))
+        {
+            //tiltAroundZ -= Input.GetAxis("Rotation") * options.rotation_speed*Time.deltaTime;
+            //vec = vec + transform.forward*Input.GetAxis("Rotation");
+            transform.RotateAround(transform.position, transform.forward, options.rotation_speed * Time.deltaTime*Input.GetAxis("Rotation"));
+        }
+        //Quaternion target = new Quaternion(vec.x, vec.y, vec.z, options.rotation_speed * Time.deltaTime);//Quaternion.Euler(tiltAroundX, tiltAroundY, tiltAroundZ);
+        //transform.rotation = transform.rotation*target;//Quaternion.Slerp(transform.rotation, target, 1);
+
+    }
 
 	Vector3 getK()
 	{
@@ -91,6 +160,7 @@ public class Camera_Controller : MonoBehaviour {
 	{
 		if (Input.GetButton ("Zoom")) 
 		{
+            //print("zoom");
 			float f = Input.GetAxis ("Zoom") * options.zoom_speed * Time.deltaTime;
 			Obj.canvas.transform.localPosition = new Vector3 (Obj.canvas.transform.localPosition.x,
 				Obj.canvas.transform.localPosition.y,
@@ -128,6 +198,14 @@ public class Camera_Controller : MonoBehaviour {
 		Obj.camera_2.orthographicSize += a * options.true_zoom_speed;
 		if (Obj.mainCamera.orthographicSize < options.min_true_zoom)
 			Obj.camera_2.orthographicSize=Obj.mainCamera.orthographicSize = options.min_true_zoom;
+        /*/
+        float f = Input.GetAxis ("Mouse ScrollWheel") * options.true_zoom_speed_2 * Time.deltaTime;
+        Obj.mainCamera.transform.localPosition = new Vector3 (Obj.mainCamera.transform.localPosition.x,
+            Obj.mainCamera.transform.localPosition.y,
+            Obj.mainCamera.transform.localPosition.z + f);
+        /*/
+        //Obj.mainCamera.scre
+        //Obj.mainCamera.si
 	}
 
 
@@ -152,6 +230,7 @@ public class Camera_Controller : MonoBehaviour {
 		public float rotation_speed;
 		public float zoom_speed;
 		public float true_zoom_speed;
+        public float true_zoom_speed_2;
 		public float min_true_zoom;
 		public int n;
 		public int m;

@@ -28,6 +28,8 @@ public class Line : MonoBehaviour {
 	bool isFleshTime=true;
 	public delegate void _awake();
 	public event _awake awake;
+    static bool isPlayMode = false;
+    static int maxL=-1;
 	public void Awake()
 	{
 		line_renderer = GetComponent<LineRenderer> ();
@@ -47,6 +49,17 @@ public class Line : MonoBehaviour {
 		if (awake != null)
 			awake ();
 	}
+
+    public static void SetPlayState(bool b)
+    {
+        isPlayMode = b;
+    }
+
+    public static void SetPlayState(bool b,int l)
+    {
+        maxL = l;
+        isPlayMode = b;
+    }
 	public void Add(Vector3 vec)
 	{
 		return;
@@ -241,17 +254,41 @@ public class Line : MonoBehaviour {
 			list.Add(vec);
 		//print(list[0].ToString());
 	}
-	public void addFunctionPoints(List<Vector3> _list)
+	public void setFunctionPoints(List<Vector3> _list)
 	{
 		if (_list == null || _list.Count == 0)
 			return;
-		function = _list;
 		//print (function.Count + " count");
 		//toBegin ();
-        line_renderer.SetVertexCount(function.Count);
-        for (int i = 0; i < function.Count; i++)
+        if (!isPlayMode || maxL < 0||_list.Count<=maxL)
         {
-            line_renderer.SetPosition(i, function[i]);
+            function = _list;
+            line_renderer.SetVertexCount(function.Count);
+            for (int i = 0; i < function.Count; i++)
+            {
+                line_renderer.SetPosition(i, function[i]);
+            }
+        }
+        else
+        {
+            line_renderer.SetVertexCount(maxL);
+            function.Clear();
+            float step = (float)maxL / _list.Count;
+            float d=1;
+            int I = 0;
+            for (int i = 0; i < _list.Count; i++)
+            {
+                if (d >= 1)
+                {
+                    line_renderer.SetPosition(I, _list[i]);
+                    function.Add(_list[i]);
+                    I++;
+                    d -= 1;
+                }
+                d += step;
+            }
+            line_renderer.SetPosition(maxL - 1, _list[_list.Count - 1]);
+
         }
 		list.Add (_list [0]);
 		if (options.arrow != null&&_list.Count>=2) 
@@ -264,7 +301,7 @@ public class Line : MonoBehaviour {
 			List<Vector3> vec = new List<Vector3> ();
 			vec.Add (start);
 			vec.Add (end);
-			options.arrow.addFunctionPoints (vec);
+			options.arrow.setFunctionPoints (vec);
 		}
 	}
 

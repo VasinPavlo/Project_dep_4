@@ -8,7 +8,7 @@ public class element_of_speed_table : MonoBehaviour {
 
     public void setNumber(float num)
     {
-        string t = num.ToString("###0.###");
+        string t = num.ToString("###0.#");
         text.text = t;
     }
 }

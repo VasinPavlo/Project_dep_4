@@ -61,6 +61,8 @@ public class File_Controller : MonoBehaviour {
 	{
 		yield return new WaitForSeconds(2f);
 		RefreshFile();
+
+        anim.SetBool("inScene",false);
 	}
 	void Refresh()
 	{

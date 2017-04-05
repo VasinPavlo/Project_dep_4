@@ -51,7 +51,7 @@ public class Arrow : Line
         Vector4 vec = _end - _start;
         V = (V <= minV ? minV : V);
         V = (V >= maxV ? maxV : V);
-        vec = _start+vec * V / (maxV-minV);
+        vec = _start+vec * (V-minV) / (maxV-minV);
         //print(vec);
         setColor(vec.x, vec.y, vec.z, vec.w);
     }

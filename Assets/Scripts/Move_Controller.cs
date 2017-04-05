@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+﻿    using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +11,9 @@ public class Move_Controller : MonoBehaviour {
     public Algorightm algo;
     public float TimeStep=0.1f;
     public float time = 10;
-    public float minTimeStepForPlay=0.1f;
+    public float maxMove_in_one_second=0.1f;
+    public int maxLenofLine=20;
+    public float speedPlay=2;
     public int AlgoIndex=1;
     float dtime;
     public bool play_after_create = false;
@@ -23,14 +25,10 @@ public class Move_Controller : MonoBehaviour {
 
 	void Start () 
     {
-        
+        Line.SetPlayState(false, maxLenofLine);
 	}
 	
 	// Update is called once per frame
-	void Update () 
-    {
-	
-	}
 
     public float current_time
     {
@@ -260,17 +258,42 @@ public class Move_Controller : MonoBehaviour {
     public void StartPlayMove(string name)
     {
         name_of_file = name;
+        Line.SetPlayState(true, maxLenofLine);
+        file = getFile(name_of_file);
+        List<Vector3> list = file.ReadLine();
+        if (list.Count == 0)
+        {
+            print("File is Empty");
+        }
+        setParam(Vector3_to_float(list));
+        list = file.ReadLine();
+        List<List<Vector3> > state = List_to_List2(list, list_of_lenght);
+        cont.Clear_list_of_lines();
+        for (int j = 0; j < state.Count; j++)
+        {
+            cont.addLines(state[j]);
+        }
+
+        Lines = cont.getList_of_Lines();
+        t = 0;
+        step_dt=0;
+        move_dt = 0;
         isPlay = true;
-        StartCoroutine("_StartPlayMove");
+        //StartCoroutine("_StartPlayMove");
+        _list_update=new List<Vector3>();
     }
+
+    File_Input file;
+    List<Line> Lines;
+    float step_dt;
+    float move_dt;
+
 
     IEnumerator _StartPlayMove()
     {
-        File_Input file = getFile(name_of_file);
         List<List<Vector3> > moves = file.Read(); 
         if (moves.Count == 0)
         {
-            print("File is Empty");
         }
         else
         {
@@ -287,10 +310,14 @@ public class Move_Controller : MonoBehaviour {
             float _dt=0;
             for (int i = 2; i < moves.Count; i++)
             {
-                yield return new WaitForSeconds(dtime);
+                while (speedPlay == 0)
+                {
+                    yield return new WaitForSeconds(0);
+                }
+                yield return new WaitForSeconds(dtime/speedPlay);
                 t += dtime;
-                _dt += dtime;
-                if (_dt < minTimeStepForPlay)
+                _dt += dtime/speedPlay;
+                if (_dt < maxMove_in_one_second)
                     continue;
                 _dt = 0;
                 print("play time:" + t);
@@ -301,12 +328,48 @@ public class Move_Controller : MonoBehaviour {
                 state = List_to_List2(moves[i], list_of_lenght);
                 for (int j = 0; j < state.Count; j++)
                 {
-                    Lines[j].addFunctionPoints(state[j]);
+                    Lines[j].setFunctionPoints(state[j]);
                 }
             }
         }
         isPlay = false;
+        Line.SetPlayState(false);
         yield return new WaitForSeconds(0);
+    }
+
+    List<Vector3> _list_update;
+
+    void Update()
+    {
+        if (isPlay&&speedPlay!=0)
+        {
+            if (file.EndOfStream)
+            {
+                isPlay = false;
+                return;
+            }
+            t += Time.deltaTime * speedPlay;
+            step_dt += Time.deltaTime * speedPlay;
+            move_dt += Time.deltaTime ;
+            //print(step_dt+"<"+dtime+","+move_dt+"<"+1.0f / maxMove_in_one_second);
+            if (step_dt < dtime)
+                return;
+            while (step_dt >= dtime)
+            {
+                step_dt -= dtime;
+                _list_update = file.ReadLine();
+            }
+
+            if (move_dt < 1.0f / maxMove_in_one_second)
+                return;
+            move_dt -= 1.0f / maxMove_in_one_second ;
+            print("play time:" + t);
+            List<List<Vector3> > list = List_to_List2(_list_update, list_of_lenght);
+            for (int j = 0; j < list.Count; j++)
+            {
+                Lines[j].setFunctionPoints(list[j]);
+            }
+        }
     }
 
 
