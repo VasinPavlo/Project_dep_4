@@ -7,10 +7,27 @@ public class Camera_Controller : MonoBehaviour {
     public SCRIPTS scripts;
     public OPTIONS options;
 	// Use this for initialization
+    float K;
 	void Start ()
     {
-		
+
+        K = pixel_to_real_size(Obj.mainCamera, 1) ;
+
+        print("K:" + K);
 	}
+
+    float pixel_to_real_size(Camera camera,float z=0)
+    {
+        Vector3 current = camera.transform.localPosition;
+        camera.transform.localPosition = new Vector3(0,0,-z);
+        camera.nearClipPlane = z;
+        Vector3 a = new Vector3(0,0,1);
+        a = camera.ScreenToWorldPoint(a);
+        Vector3 b = new Vector3(camera.pixelWidth,camera.pixelHeight,z);
+        b = camera.ScreenToWorldPoint(b);
+        camera.transform.localPosition = current;
+        return (b - a).magnitude;
+    }
 	
 	// Update is called once per frame
     float tiltAroundZ=0;
@@ -67,20 +84,22 @@ public class Camera_Controller : MonoBehaviour {
         List<Vector3> list = new List<Vector3>();
         float h = Obj.mainCamera.pixelHeight;
         float w = Obj.mainCamera.pixelWidth;
+        print(h + " " + w);
         float steph = h / (options.m - 1);
         float stepw = w / (options.n - 1);
         steph = stepw;
         Vector3 vector;
-        Vector3 fow = Obj.mainCamera.transform.forward*Mathf.Abs(Obj.mainCamera.transform.localPosition.z);
-        fow = fow / fow.magnitude;
+        //Vector3 fow = Obj.mainCamera.transform.forward/Obj.mainCamera.transform.forward.magnitude*Mathf.Abs(Obj.mainCamera.transform.localPosition.z);
+        //fow = fow / fow.magnitude;
         for (float x = 0; x <= w; x+=stepw)
         {
             for (float y = 0; y <= h; y+=steph)
             {
-                vector = new Vector3(x, y);
+                vector = new Vector3(x, y, Mathf.Abs(Obj.mainCamera.transform.localPosition.z)) ;
+                Vector3 vec = vector;
                 vector = Obj.mainCamera.ScreenToWorldPoint(vector);
-                print(vector);
-                list.Add(vector+fow);
+                //print(vec+"->"+(vector));
+                list.Add(vector);
             }
         }
         print(list.Count);
@@ -194,19 +213,28 @@ public class Camera_Controller : MonoBehaviour {
 	void true_zoom()
 	{
 		float a=-Input.GetAxis ("Mouse ScrollWheel");
-		Obj.mainCamera.orthographicSize += a * options.true_zoom_speed ;
+		//Obj.mainCamera.orthographicSize += a * options.true_zoom_speed ;
+        print(a * options.true_zoom_speed);
 		Obj.camera_2.orthographicSize += a * options.true_zoom_speed;
-		if (Obj.mainCamera.orthographicSize < options.min_true_zoom)
+		if (false&&Obj.mainCamera.orthographicSize < options.min_true_zoom)
 			Obj.camera_2.orthographicSize=Obj.mainCamera.orthographicSize = options.min_true_zoom;
-        /*/
-        float f = Input.GetAxis ("Mouse ScrollWheel") * options.true_zoom_speed_2 * Time.deltaTime;
+        //
+        //float f = Input.GetAxis ("Mouse ScrollWheel") * options.true_zoom_speed_2 * Time.deltaTime;
+        float f=-fromOrthographicSize_to_Perspective();
         Obj.mainCamera.transform.localPosition = new Vector3 (Obj.mainCamera.transform.localPosition.x,
             Obj.mainCamera.transform.localPosition.y,
-            Obj.mainCamera.transform.localPosition.z + f);
-        /*/
+                f);
+        Obj.mainCamera.nearClipPlane = -1*Obj.mainCamera.transform.localPosition.z;
+        //
         //Obj.mainCamera.scre
         //Obj.mainCamera.si
 	}
+
+    float fromOrthographicSize_to_Perspective()
+    {
+        float len = pixel_to_real_size(Obj.camera_2);
+        return len / K;
+    }
 
 
     //===============struct
