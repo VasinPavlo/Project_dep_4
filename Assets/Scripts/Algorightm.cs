@@ -8,10 +8,13 @@ public class Algorightm : MonoBehaviour {
 	// Use this for initialization
 	public Options options;
 	public Objects Obj;
-	public List<Vector3>  lists_of_speed;
+	public List<Vector3> lists_of_speed;
+    public List<Vector3> lists_of_speed2;
 	List<Edge> _lines;
 	List<Vector3> _points;
 	List<Vector3> _lines_2;
+    List<List<Vector3> > _lines_3;
+    int index_of_lines_3;
 	List<MyThread> threads;
 	Thread thread;
 	[System.NonSerialized]
@@ -68,12 +71,31 @@ public class Algorightm : MonoBehaviour {
 		{
 			//print ("Hello " + thread.ManagedThreadId);
 			if (isTime_Start)
-			{
-				isTime_Start = false;
-				thread.Priority = System.Threading.ThreadPriority.Normal;
-				print ("FindList_of_speed");
-				FindList_of_speed ();
-				thread.Priority = System.Threading.ThreadPriority.Normal;
+            {
+                isTime_Start = false;
+                if (index_of_lines_3 == -1)
+                {
+                    thread.Priority = System.Threading.ThreadPriority.Normal;
+                    print("FindList_of_speed");
+                    FindList_of_speed();
+                    thread.Priority = System.Threading.ThreadPriority.Normal;
+                }
+                else
+                {
+                    if (_lines_3.Count == 0)
+                        continue;
+                    if (index_of_lines_3 >= _lines_3.Count)
+                    {
+                        index_of_lines_3 = -1;
+                        continue;
+                    }
+                    _lines_2 = _lines_3[index_of_lines_3];
+                    //print("Count:"+_lines_2.Count);
+                    thread.Priority = System.Threading.ThreadPriority.Highest;
+                    print("FindList_of_speed");
+                    FindList_of_speed();
+                    thread.Priority = System.Threading.ThreadPriority.Normal;
+                }
 			}
 			Thread.Sleep (0);
 		}
@@ -90,6 +112,7 @@ public class Algorightm : MonoBehaviour {
 		isWork = true;
 		//StartCoroutine ("FindList_of_speed");
 		//FindList_of_speed ();
+        index_of_lines_3=-1;
 		print("FindVector_of_speed");
 	}
 
@@ -102,6 +125,24 @@ public class Algorightm : MonoBehaviour {
 		isTime_Start=true;
 		isWork=true;
 	}
+
+    public void FindVector_of_speed(List<List<Vector3> > _lines,List<Vector3> points)
+    {
+        if (isWork)
+            return;
+        
+        _lines_3 = _lines;
+        _points = points;
+        index_of_lines_3 = 0;
+
+        lists_of_speed2 = new List<Vector3>();
+        for (int i = 0; i < points.Count; i++)
+        {
+            lists_of_speed2.Add(new Vector3());
+        }
+        isWork = true;
+        isTime_Start = true;
+    }
 
 
 
@@ -118,8 +159,13 @@ public class Algorightm : MonoBehaviour {
 			lists_of_speed.Add (new Vector3 ());
 		}
 		count_of_thread = 0;
+        print("oks:" + options.isVector3Line);
 		if (options.isVector3Line) 
 		{
+            print("<");
+            print(_points.Count);
+            print(_lines_2.Count);
+            print(_points.Count + "<" + (_lines_2.Count - 1));
 			if (_points.Count < _lines_2.Count-1) 
 			{
 				while (threads.Count < _points.Count) 
@@ -257,10 +303,40 @@ public class Algorightm : MonoBehaviour {
 
 			}
 		}
-		print ("end Work");
-		isWork = false;
-		Clear_text_in_main_canvas ();
+        End_of_fspeed();
 	}
+
+    void End_of_fspeed()
+    {
+        if (index_of_lines_3 == -1)
+        {
+            print("end Work");
+            isWork = false;
+            Clear_text_in_main_canvas();
+        }
+        else
+        {
+            print("find:" + index_of_lines_3);
+            lists_of_speed2=Move_Controller.plus(lists_of_speed2, lists_of_speed);
+            index_of_lines_3++;
+            if (_lines_3.Count <= index_of_lines_3)
+            {
+                lists_of_speed.Clear();
+                lists_of_speed = lists_of_speed2;
+                lists_of_speed2 = null;
+                _lines_3 = null;
+                print("end Work");
+                isWork = false;
+                Clear_text_in_main_canvas();
+
+            }
+            else
+            {
+                //_lines_2 = _lines_3[index_of_lines_3];
+                isTime_Start = true;
+            }
+        }
+    }
 
 	void setNumber_in_main_canvas(int a,int p,string text)
 	{

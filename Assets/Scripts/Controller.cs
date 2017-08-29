@@ -42,7 +42,7 @@ public class Controller : MonoBehaviour {
 
 	List<GameObject> points;
 	List<Vector3> vec_points;
-	List<Vector3> vec_of_lines;
+    List<List<Vector3>> vec_of_lines;
 	List<Line> vec_of_Lines;
 	List<Edge> lines;
 	List<Edge> vectors;
@@ -57,7 +57,7 @@ public class Controller : MonoBehaviour {
 		lines = new List<Edge>  ();
 		vectors = new List<Edge> ();
 		vectors_line = new List<Line> ();
-		vec_of_lines = new List<Vector3> ();
+        vec_of_lines = new List<List<Vector3>>();
 		vec_of_Lines = new List<Line> ();
         vectors_line_3 = new List<Arrow> ();
         //vectors_of_arrow = new List<Arrow>();
@@ -102,13 +102,15 @@ public class Controller : MonoBehaviour {
         //Obj.move_controller.StartCreateMoves("ellipseE03");
         //Obj.move_controller.StartCreateMoves("ellipseE04");
         //Obj.move_controller.StartCreateMoves("squ");
-        //Obj.move_controller.StartPlayMove("ellipseE04");
+        Obj.move_controller.StartPlayMove("ellipseE04");
         //Clear_list_of_lines();
 
-        //AddToreV(new Vector3(),10,6,60*40,60);
-        //Obj.move_controller.StartCreateMoves("Tore1");
+        //AddToreV(new Vector3(),0,10,6,40,90);
+        //print(AddToreV(1,new Vector3(),10.0f,8.0f,40,90));
+        //AddToreV(25,new Vector3(),10.0f,8.0f,40,2);
+        //Obj.move_controller.StartCreateMoves("Tore8");
 
-        Obj.move_controller.StartPlayMove("Tore4");
+        //Obj.move_controller.StartPlayMove("Tore4");
 
         //Obj.grad_table.create_table(options.number_of_grad, options.minColor, options.maxColor);
         //Obj.speed_table.create_table(options.number_of_grad, options.minV, options.maxV);
@@ -116,6 +118,168 @@ public class Controller : MonoBehaviour {
         Obj.online_options.create_table(options.number_of_grad, options.minColor, options.maxColor, options.minV, options.maxV);
         //Obj.file_cont.setActive();
 	}
+
+    void Doing_Something()
+    {
+        CreateGif_of_Tore(true, 25, new Vector3(), 10.0f, 8.0f, 40, 2,1);
+        //StartCoroutine("_Doint_Something");
+    }
+
+    void CreateGif_of_Tore(bool isVer,int k, Vector3 vec,float R,float r,int n,int N,float koef)
+    {
+        string name_of_file;
+        //Clear_list_of_lines();
+        float d = 360.0f;// Obj.Cam_cont.options.turn_degree;
+        //Obj.Cam_cont.options.turn_degree = 360.0f *(int)((float)N / koef+0.5f);
+        Parameter_for_create_gif param;
+        param.isVer = isVer;
+        param.k = k;
+        param.n = N;
+        param.speed_mode = koef;
+        if (isVer)
+        {
+            //name_of_file = AddToreV(k, vec, R, r, n, N);
+            name_of_file="Tore";
+            Obj.Cam_cont.CreateGif(name_of_file,param);
+        }
+        else
+        {
+            name_of_file = AddToreH(k, vec, R, r, n, N);
+            Obj.Cam_cont.CreateGif(name_of_file, param);
+        }
+    }
+
+    public struct Parameter_for_create_gif
+    {
+        public int k;
+        public bool isVer;
+        public int n;
+        public float speed_mode;
+    }
+
+    IEnumerator _Doint_Something()
+    {
+        string name_of_file;
+        float k = 1.0f/3;
+        //=====================================================================1140х360
+        /*/
+        Clear_list_of_lines();
+        name_of_file=AddToreV(1,new Vector3(), 10.0f, 6.0f, 40, 1);
+        Obj.Cam_cont.CreateGif(name_of_file);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        Clear_list_of_lines();
+        name_of_file=AddToreV(1,new Vector3(), 10.0f, 6.0f, 40, 2);
+        Obj.Cam_cont.CreateGif(name_of_file);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        /*/
+        CreateGif_of_Tore(true, 1, new Vector3(), 10.0f, 6.0f, 40, 7,1);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        CreateGif_of_Tore(true, 1, new Vector3(), 10.0f, 6.0f, 40, 90,2);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        //======================================================================
+        //=====================================================================
+        /*/
+        Clear_list_of_lines();
+        name_of_file=AddToreH(1,new Vector3(), 10.0f, 6.0f, 40, 2);
+        Obj.Cam_cont.CreateGif(name_of_file);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        /*/
+        CreateGif_of_Tore(false, 1, new Vector3(), 10.0f, 6.0f, 40, 3,1.0f/2);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        CreateGif_of_Tore(false, 1, new Vector3(), 10.0f, 6.0f, 40, 7,1);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        CreateGif_of_Tore(false, 1, new Vector3(), 10.0f, 6.0f, 40, 70,3);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        //======================================================================
+        //=====================================================================
+        CreateGif_of_Tore(true, 3, new Vector3(), 10.0f, 6.0f, 40, 1,1.0f/4);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        CreateGif_of_Tore(true, 3, new Vector3(), 10.0f, 6.0f, 40, 2,1.0f/3);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        CreateGif_of_Tore(true, 3, new Vector3(), 10.0f, 6.0f, 40, 7,k);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        //======================================================================
+        //=====================================================================
+        CreateGif_of_Tore(false, 3, new Vector3(), 10.0f, 6.0f, 40, 2,1.0f/4);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        CreateGif_of_Tore(false, 3, new Vector3(), 10.0f, 6.0f, 40, 7,k);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        //======================================================================
+        //=====================================================================
+        CreateGif_of_Tore(true, 7, new Vector3(), 10.0f, 6.0f, 40, 2,2.0f/3);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        /*/
+        Clear_list_of_lines();
+        name_of_file=AddToreV(7,new Vector3(), 10.0f, 6.0f, 40, 7);
+        Obj.Cam_cont.CreateGif(name_of_file);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        /*/
+        //======================================================================
+        //=====================================================================
+        CreateGif_of_Tore(false, 11, new Vector3(), 10.0f, 6.0f, 40, 2,1.0f/5);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+
+        CreateGif_of_Tore(false, 11, new Vector3(), 10.0f, 6.0f, 40, 7,1.0f/5);
+        while (Obj.Cam_cont.Gif_is_creating)
+        {
+            yield return new WaitForSeconds(0);
+        }
+        //======================================================================
+    }
 
 	void OnApplicationQuit()//берш
 	{
@@ -178,82 +342,93 @@ public class Controller : MonoBehaviour {
         addLines(list);
     }
 
-    void AddToreV(Vector3 pos,float R,float r,float stepR,float stepr)
+    void AddToreV(Vector3 pos,float start_alpha,float R,float r,float stepR,float stepr)
     {
-        List<Vector3> list = getToreV(pos, R, r, stepR, stepr);
+        List<Vector3> list = Obj.line_builder.getToreV(pos,start_alpha, R, r, stepR, stepr);
         addLines(list);
     }
 
-    void AddToreV(Vector3 pos,float R,float r,int n,int N)
+    void AddToreV(Vector3 pos,float start_alpha,float R,float r,int n,int N)
     {
-        AddToreV(pos, R, r, 2*Mathf.PI / n, 2*Mathf.PI * N / n);
+        n = n * N;
+        AddToreV(pos,start_alpha, R, r, 2*Mathf.PI / n, 2*Mathf.PI * N / n);
     }
 
     void addEllipse(Vector3 pos,float a,float b)
     {
-        addLines(getEllipse(pos, a, b));
+        addLines(Obj.line_builder.getEllipse(pos, a, b));
     }
 
-
-    void AddToreH(Vector3 pos,float R,float r,float stepR,float stepr)
+    void AddBallH(Vector3 pos,float R,  int n,int N)
     {
-        List<Vector3> list = getToreV(pos, R, r, stepR, stepr);
+        n = n * N;
+        AddBall(pos, R, 2*Mathf.PI / n, 2*Mathf.PI * N / n);
+    }
+    void AddBallV(Vector3 pos,float R,  int n,int N)
+    {
+        n = n * N;
+        AddBall(pos, R, 2*Mathf.PI*N / n, 2*Mathf.PI  / n);
+    }
+    void AddBall(Vector3 pos,float R,  float stepR,float stepr)
+    {
+        List<Vector3> list = Obj.line_builder.getBall(pos, R, stepR, stepr);
         addLines(list);
     }
 
-    void AddToreH(Vector3 pos,float R,float r,int n,int N)
+    /*/
+    void AddToreH(Vector3 pos,float start_alpha,float R,float r,float stepR,float stepr)
     {
-        AddToreV(pos, R, r,2*Mathf.PI * N / n , 2*Mathf.PI / n);
+        List<Vector3> list = Obj.line_builder.getToreV(pos, R, r, stepR, stepr);
+        addLines(list);
+    }
+    /*/
+    void AddToreH(Vector3 pos,float start_alpha,float R,float r,int n,int N)
+    {
+        n = n * N;
+        AddToreV(pos,start_alpha, R, r,2*Mathf.PI * N / n , 2*Mathf.PI / n);
     }
 
-    List<Vector3> getSquare(Vector3 a,Vector3 b,Vector3 c, Vector3 d)
+    void AddToreH(Vector3 pos,float R,float r,int n,List<int> Ns)
     {
-        List<Vector3> list=new List<Vector3>();
-        list.Add(a);
-        list.Add(b);
-        list.Add(c);
-        list.Add(d);
-        //list.Add(a);
-        return list;
-    }
-
-    List<Vector3> getTriangle(Vector3 a,Vector3 b,Vector3 c)
-    {
-        List<Vector3> list=new List<Vector3>();
-        list.Add(a);
-        list.Add(b);
-        list.Add(c);
-        list.Add(a);
-        return list;
-    }
-
-    List<Vector3> getEllipse(Vector3 pos, float a, float b)
-    {
-        List<Vector3> list = new List<Vector3>();
-        Vector3 vec;
-        for(float x=0;x<2*Mathf.PI;x+=0.1f)//2*Mathf.PI/40)
+        float start_alpha = 2*Mathf.PI/Ns.Count;
+        for (int i = 0; i < Ns.Count; i++)
         {
-            vec = new Vector3(a * Mathf.Cos(x) + pos.x, b * Mathf.Sin(x) + pos.y, pos.z);
-            list.Add(vec);
+            AddToreH(pos, start_alpha * i, R, r, n, Ns[i]);
         }
-        vec = new Vector3(a * Mathf.Cos(2*Mathf.PI) + pos.x, b * Mathf.Sin(2*Mathf.PI) + pos.y, pos.z);
-        list.Add(vec);
-        return list;
     }
 
-    List<Vector3> getToreV(Vector3 pos, float R,float r,float stepR,float stepr)
+    string AddToreH(int number_of_tore,Vector3 pos,float R,float r,int n,int N)
     {
-        Vector3 point;
-        List<Vector3> list=new List<Vector3>();
-        for(float gamma=0, alpha=0;gamma<2*Mathf.PI||alpha<2*Mathf.PI;gamma+=stepR,alpha+=stepr)
+        List<int> Ns = new List<int>();
+        for (int i = 0; i < number_of_tore; i++)
         {
-            point = new Vector3((R + r * Mathf.Cos(alpha)) * Mathf.Cos(gamma), (R + r * Mathf.Cos(alpha)) * Mathf.Sin(gamma), r * Mathf.Sin(alpha));
-            list.Add(point);
+            Ns.Add(N);
         }
-        point=new Vector3((R + r * Mathf.Cos(0)) * Mathf.Cos(0), (R + r * Mathf.Cos(0)) * Mathf.Sin(0), r * Mathf.Sin(0));
-        list.Add(point);
-        return list;
+        AddToreH(pos, R, r, n, Ns);
+        return "k_" + number_of_tore.ToString() + "_n_1_m_" + N.ToString();
     }
+    void AddToreV(Vector3 pos,float R,float r,int n,List<int> Ns)
+    {
+        float start_alpha = 2*Mathf.PI/Ns.Count;
+        for (int i = 0; i < Ns.Count; i++)
+        {
+            AddToreV(pos, start_alpha * i, R, r, n, Ns[i]);
+        }
+
+    }
+
+    string AddToreV(int number_of_tore,Vector3 pos,float R,float r,int n,int N)
+    {
+        List<int> Ns = new List<int>();
+        for (int i = 0; i < number_of_tore; i++)
+        {
+            Ns.Add(N);
+        }
+        AddToreV(pos, R, r, n, Ns);
+        return "k_" + number_of_tore.ToString() + "_n_" + N.ToString()+"_m_1";
+    }
+
+
 
 	
 	// Update is called once per frame
@@ -287,6 +462,7 @@ public class Controller : MonoBehaviour {
         if (Input.GetButtonUp("Projection"))
         {
             options.isProjectionTime = !options.isProjectionTime;
+            print("Projection:" + options.isProjectionTime);
         }
 		if (Input.GetButtonUp ("Clear vector field")) 
 		{
@@ -356,6 +532,7 @@ public class Controller : MonoBehaviour {
 			//vec_points.Add (Obj.Cam_cont.getMousePosition ());
 			if (options.isTime_for_Light_Render_Grafick) 
 			{
+                print("count:" + vec_of_lines.Count);
 				Obj.algo.FindVector_of_speed (vec_of_lines, vec_points);
 			} 
 			else 
@@ -365,6 +542,10 @@ public class Controller : MonoBehaviour {
 			wait = true;
 			print ("Start");
 		}
+        if (Input.GetButtonUp("Start_Doing_something"))
+        {
+            Doing_Something();
+        }
 	}
 
     void Move_and_Moves()
@@ -514,21 +695,14 @@ public class Controller : MonoBehaviour {
 			{
 				Line line = (MonoBehaviour.Instantiate (clones.line_2, new Vector3 (), Quaternion.Euler (0, 0, 0))as GameObject).GetComponent<Line> ();
 				vec_of_Lines.Add (line);
-				List<Vector3> _list = new List<Vector3> ();
-				for (int i = 0; i < list.Count; i++) {
-					vec_of_lines.Add (list [i]);
-					_list.Add (list [i]);
-				}
-				line.setFunctionPoints (_list);
+                vec_of_lines.Add(list);
+				line.setFunctionPoints (list);
 				line.transform.SetParent (parents.Lines.transform);
 				sup_Index_of_Lines++;
 			} 
 			else 
 			{
-                for (int i = 0; i < list.Count; i++)
-                {
-                    vec_of_lines.Add(list[i]);
-                }
+                vec_of_lines.Add(list);
                 vec_of_Lines[sup_Index_of_Lines].gameObject.SetActive(true);
 				vec_of_Lines[sup_Index_of_Lines].setFunctionPoints(list);
 				sup_Index_of_Lines++;
@@ -654,11 +828,14 @@ public class Controller : MonoBehaviour {
             break;
             case 5:
                 end = end - start;
-                if (current_maxV != -1 && end.magnitude > current_maxV)
-                    end = end / end.magnitude * current_maxV;
-                if (current_minV != -1 && end.magnitude < current_minV)
-                    end = end / end.magnitude * current_minV;
-                end = end/end.magnitude*(end.magnitude-current_minV) / (current_maxV-current_minV) * param.size_of_web;
+                if (end.magnitude != 0)
+                {
+                    if (current_maxV != -1 && end.magnitude > current_maxV)
+                        end = end / end.magnitude * current_maxV;
+                    if (current_minV != -1 && end.magnitude < current_minV)
+                        end = end / end.magnitude * current_minV;
+                    end = end / end.magnitude * (end.magnitude - current_minV) / (current_maxV - current_minV) * param.size_of_web;
+                }
                 end = start + end;
                 if (sup_Index_of_Vectors_list_3 >= vectors_line_3.Count) 
                 {
@@ -695,6 +872,15 @@ public class Controller : MonoBehaviour {
 		//
         if (points.Count == 0)
             return;
+        if((options.isTime_for_Light_Render_Vector==4||options.isTime_for_Light_Render_Vector==5)
+            &&current_normal!=null&options.isProjectionTime)
+            for (int i = 0; i < list_of_speed.Count; i++)
+            {
+                //print(list_of_speed[i] + "->");
+                list_of_speed[i] = Vector3.ProjectOnPlane(list_of_speed[i], current_normal);
+                //print(list_of_speed[i]);
+            }
+        //return;
         if (options.isAutoV)
         {
             current_minV = current_maxV = list_of_speed[0].magnitude;
@@ -723,7 +909,7 @@ public class Controller : MonoBehaviour {
 
 		for (int i = 0; i < points.Count; i++) 
 		{
-            if(options.isTime_for_Light_Render_Vector==4&&current_normal!=null&options.isProjectionTime)
+            if(false&&options.isTime_for_Light_Render_Vector==4&&current_normal!=null&options.isProjectionTime)
                 list_of_speed[i] = Vector3.ProjectOnPlane(list_of_speed[i], current_normal);
 			addVector (points [i], points [i] + list_of_speed [i]);
 		}
@@ -794,6 +980,7 @@ public class Controller : MonoBehaviour {
         public File_Controller file_cont;
         public Online_Options online_options;
         public Move_Controller move_controller;
+        public Line_Builder line_builder;
         //public table_of_grad grad_table;
         //public table_of_speed speed_table;
 	}

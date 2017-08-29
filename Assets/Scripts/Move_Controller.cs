@@ -1,4 +1,4 @@
-﻿    using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -51,13 +51,14 @@ public class Move_Controller : MonoBehaviour {
         StartCoroutine("_StartCreateMoves");
     }
 
-    List<Vector3> plus(List<Vector3> a,List<Vector3> b)
+    static public List<Vector3> plus(List<Vector3> a,List<Vector3> b)
     {
+        List<Vector3> c = new List<Vector3>();
         for (int i = 0; i < a.Count; i++)
         {
-            a[i] = a[i] + b[i];
+            c.Add( a[i] + b[i]);
         }
-        return a;
+        return c;
     }
 
     List<List<Vector3> > plus(List<List<Vector3> > x,List<Vector3>  v, float dt)
@@ -112,6 +113,7 @@ public class Move_Controller : MonoBehaviour {
             switch (AlgoIndex)
             {
                 case 1:
+                    /*/
                     for (int i = 0; i < vortex_line_1.Count; i++)
                     {
                         algo.FindVector_of_speed(vortex_line_1[i], points1);
@@ -124,6 +126,15 @@ public class Move_Controller : MonoBehaviour {
                         else
                             v=plus(v,algo.lists_of_speed);
                     }
+                    /*/
+
+                    algo.FindVector_of_speed(vortex_line_1, points1);
+                    while (algo.isWork)
+                    {
+                        yield return new WaitForSeconds(0);
+                    }
+                    v = algo.lists_of_speed;
+
                     vortex_line_1=plus(vortex_line_1, v, TimeStep);
                     break;
                 case 2:
